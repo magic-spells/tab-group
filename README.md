@@ -92,6 +92,8 @@ document
 
 ## 🎨 Styling
 
+### CSS Variables
+
 The Tab Group component can be extensively customized using CSS variables:
 
 ```css
@@ -133,6 +135,79 @@ tab-group {
   --tab-indicator-left: 0;
   --tab-indicator-right: 0;
 }
+```
+
+### SCSS Integration
+
+This package provides multiple ways to integrate with your SCSS workflow:
+
+```scss
+// Option 1: Use the main entry point (recommended)
+@use "@magic-spells/tab-group/scss" with (
+  $color-primary: #3366ff,
+  $border-radius: 0.5rem
+);
+
+// Option 2: Import individual files
+@use "@magic-spells/tab-group/scss/variables" with (
+  $color-primary: #3366ff,
+  $border-radius: 0.5rem
+);
+@use "@magic-spells/tab-group/scss/tab-group";
+
+// Option 3: Direct paths (if needed)
+@use "node_modules/@magic-spells/tab-group/dist/tab-group.scss";
+@use "node_modules/@magic-spells/tab-group/dist/scss/tab-group";
+```
+
+#### Available SCSS Variables
+
+You can customize the appearance by overriding these SCSS variables:
+
+```scss
+// Colors
+$color-background: #ffffff !default;
+$color-text: #333333 !default;
+$color-border: #dddddd !default;
+$color-border-hover: #bbbbbb !default;
+$color-border-dark: #999999 !default;
+$color-primary: #3366ff !default;
+$color-hover: #f0f5ff !default;
+$color-focus: #b3cbff !default;
+
+// Border radius
+$border-radius: 0.5rem !default;
+
+// Box shadow
+$box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !default;
+
+// Tab list
+$tab-list-gap: 0.25rem !default;
+$tab-list-padding: 0.5rem 0.5rem 0 !default;
+$tab-list-background: transparent !default;
+$tab-list-border-bottom: 1px solid $color-border !default;
+$tab-list-radius: $border-radius $border-radius 0 0 !default;
+
+// Tab button
+$tab-button-radius: 0.25rem 0.25rem 0 0 !default;
+$tab-active-background: white !default;
+$tab-active-color: $color-primary !default;
+$tab-active-font-weight: 500 !default;
+$tab-active-shadow: none !default;
+$tab-active-transform: translateY(0) !default;
+
+// Tab indicator
+$tab-indicator-height: 2px !default;
+$tab-indicator-color: $color-primary !default;
+$tab-indicator-left: 0 !default;
+$tab-indicator-right: 0 !default;
+
+// Panel
+$panel-background: white !default;
+$panel-border: 1px solid $color-border !default;
+$panel-padding: 1rem !default;
+$panel-radius: 0 0 $border-radius $border-radius !default;
+$panel-shadow: $box-shadow !default;
 ```
 
 ## 🌈 Theme Examples
