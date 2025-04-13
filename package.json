@@ -1,0 +1,63 @@
+{
+  "name": "@magic-spells/tab-group",
+  "version": "0.1.0",
+  "description": "Tab group and tab list html component.",
+  "license": "MIT",
+  "author": "Cory Schulz",
+  "type": "module",
+  "main": "dist/tab-group.cjs.js",
+  "module": "dist/tab-group.esm.js",
+  "unpkg": "dist/tab-group.min.js",
+  "style": "dist/tab-group.min.css",
+  "sass": "dist/tab-group.scss",
+  "exports": {
+    ".": {
+      "import": "./dist/tab-group.esm.js",
+      "require": "./dist/tab-group.cjs.js",
+      "default": "./dist/tab-group.esm.js"
+    },
+    "./css": "./dist/tab-group.css",
+    "./css/min": "./dist/tab-group.min.css",
+    "./scss": "./dist/tab-group.scss",
+    "./scss/*": "./dist/scss/*"
+  },
+  "sideEffects": true,
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/magic-spells/tab-group.git"
+  },
+  "files": [
+    "dist/",
+    "src/"
+  ],
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
+  "browserslist": [
+    "last 2 versions",
+    "not dead",
+    "not ie <= 11"
+  ],
+  "devDependencies": {
+    "@eslint/js": "^8.57.0",
+    "@rollup/plugin-node-resolve": "^15.2.3",
+    "@rollup/plugin-terser": "^0.4.4",
+    "eslint": "^8.0.0",
+    "globals": "^13.24.0",
+    "prettier": "^3.3.3",
+    "rollup": "^3.0.0",
+    "rollup-plugin-copy": "^3.5.0",
+    "rollup-plugin-postcss": "^4.0.2",
+    "rollup-plugin-serve": "^1.1.1",
+    "sass": "^1.86.3"
+  },
+  "scripts": {
+    "build": "rollup -c",
+    "lint": "eslint src/ rollup.config.mjs",
+    "format": "prettier --write .",
+    "prepublishOnly": "npm run build",
+    "serve": "rollup -c --watch",
+    "dev": "rollup -c --watch"
+  }
+}

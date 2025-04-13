@@ -1,0 +1,125 @@
+// Tab Group base styles
+tab-group {
+  display: block;
+  width: 100%;
+  font-family: var(--font-family);
+  font-size: var(--font-size-base);
+  line-height: var(--line-height);
+  color: var(--color-text);
+}
+
+// Tab List styles
+tab-list {
+  display: flex;
+  border-bottom: var(
+    --tab-list-border-bottom,
+    1px solid var(--color-border)
+  );
+  margin-bottom: var(--spacing-md);
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: var(--tab-list-padding, 0.5rem 0.25rem 0);
+  gap: var(--tab-list-gap, 0.25rem);
+  justify-content: var(--tab-list-justify, flex-start);
+  background-color: var(--tab-list-background, transparent);
+  background-image: var(--tab-list-background-image, none);
+  border-radius: var(--tab-list-radius, 0);
+}
+
+// Tab Button styles
+tab-button {
+  display: block;
+  padding: var(--spacing-sm) var(--spacing-md);
+  margin: var(--spacing-xs);
+  border: 1px solid transparent;
+  border-bottom: none;
+  background-color: var(--color-background);
+  color: var(--color-text);
+  cursor: pointer;
+  border-radius: var(
+    --tab-button-radius,
+    var(--border-radius) var(--border-radius) 0 0
+  );
+  white-space: nowrap;
+  user-select: none;
+  transition: all var(--transition-duration);
+  margin-bottom: -1px;
+  position: relative;
+  font-size: var(--font-size-base);
+  font-weight: var(--tab-button-font-weight, normal);
+  text-align: center;
+  min-width: 100px;
+
+  &:hover {
+    background-color: var(--color-hover);
+  }
+
+  &:focus {
+    outline: none;
+    box-shadow: var(
+      --tab-button-focus-shadow,
+      0 0 0 2px var(--color-primary)
+    );
+  }
+
+  &[aria-selected='true'] {
+    background-color: var(
+      --tab-active-background,
+      var(--color-background)
+    );
+    border-color: var(--color-border);
+    border-bottom: 1px solid var(--color-background);
+    font-weight: var(--tab-active-font-weight, 600);
+    color: var(--tab-active-color, var(--color-primary));
+    box-shadow: var(--tab-active-shadow, none);
+    transform: var(--tab-active-transform, none);
+
+    &::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: var(--tab-indicator-left, 0);
+      right: var(--tab-indicator-right, 0);
+      height: var(--tab-indicator-height, 2px);
+      background-color: var(
+        --tab-indicator-color,
+        var(--color-primary)
+      );
+      border-radius: var(--tab-indicator-radius, 0);
+    }
+  }
+}
+
+// Tab Panel styles
+tab-panel {
+  display: block;
+  padding: var(--panel-padding, var(--spacing-md));
+  background-color: var(--panel-background, var(--color-background));
+  border-radius: var(
+    --panel-radius,
+    0 0 var(--border-radius) var(--border-radius)
+  );
+  border: var(--panel-border, none);
+  border-top: var(--panel-border-top, none);
+  box-shadow: var(--panel-shadow, none);
+  transition: var(--panel-transition, all 0.3s ease);
+  margin: var(--panel-margin, 0);
+  min-height: var(--panel-min-height, 150px);
+
+  // When hidden (using the hidden attribute)
+  &[hidden] {
+    display: none;
+  }
+}
+
+// Responsive adjustments
+@media (max-width: 768px) {
+  tab-list {
+    flex-wrap: wrap;
+  }
+
+  tab-button {
+    flex: 1 0 auto;
+    text-align: center;
+  }
+}

@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Tab Group Demo</title>
+    <link rel="stylesheet" href="tab-group.min.css" />
+    <style>
+      /* Demo page styles */
+      html * {
+        box-sizing: border-box;
+      }
+      
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+          Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+        padding: 2rem;
+        max-width: 800px;
+        margin: 0 auto;
+        background-color: #f5f5f5;
+        color: #333;
+      }
+
+      h1, h2 {
+        margin-bottom: 1rem;
+      }
+
+      p {
+        margin-bottom: 1.5rem;
+        line-height: 1.5;
+      }
+
+      section {
+        margin-bottom: 3rem;
+        padding: 1.5rem;
+        background-color: white;
+        border-radius: 0.5rem;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+
+      .demo-container {
+        margin: 2rem 0;
+      }
+
+      code {
+        font-family: monospace;
+        background-color: #f2f2f2;
+        padding: 0.2rem 0.4rem;
+        border-radius: 0.25rem;
+        font-size: 0.9em;
+      }
+
+      pre {
+        background-color: #f8f8f8;
+        padding: 1rem;
+        border-radius: 0.25rem;
+        overflow-x: auto;
+        margin: 1rem 0;
+      }
+
+      .theme-selector {
+        margin-bottom: 2rem;
+      }
+
+      /* Custom theme examples */
+      .theme-default tab-group {
+        /* Uses default styling */
+      }
+
+      .theme-dark tab-group {
+        --color-background: #2d3748;
+        --color-text: #e2e8f0;
+        --color-border: #4a5568;
+        --color-border-hover: #718096;
+        --color-border-dark: #a0aec0;
+        --color-primary: #4299e1;
+        --color-hover: #1a202c;
+        --color-focus: #2c5282;
+        --panel-background: #1e293b;
+        --panel-border: 1px solid #4a5568;
+        --panel-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+        --tab-active-color: #63b3ed;
+        --tab-indicator-height: 3px;
+        --tab-indicator-color: #63b3ed;
+      }
+
+      .theme-rounded tab-group {
+        --border-radius: 0.5rem;
+        --color-primary: #9f7aea;
+        --color-focus: #e9d8fd;
+        --tab-button-radius: 999px;
+        --tab-list-padding: 0.75rem 0.5rem 0;
+        --tab-list-gap: 0.5rem;
+        --panel-radius: 1rem;
+        --panel-shadow: 0 4px 12px rgba(159, 122, 234, 0.15);
+        --panel-border: 1px solid #e9d8fd;
+        --panel-padding: 1.5rem;
+        --tab-active-background: #9f7aea;
+        --tab-active-color: white;
+        --tab-active-font-weight: 500;
+        --tab-active-transform: translateY(-3px);
+        --tab-active-shadow: 0 4px 8px rgba(159, 122, 234, 0.3);
+        --tab-indicator-height: 0;
+      }
+
+      .theme-minimal tab-group {
+        --border-radius: 0;
+        --color-border: #e2e8f0;
+        --color-border-hover: #cbd5e0;
+        --color-primary: #718096;
+        --box-shadow: none;
+        --tab-list-padding: 0;
+        --tab-button-radius: 0;
+        --tab-list-border-bottom: none;
+        --tab-indicator-height: 2px;
+        --tab-indicator-left: 25%;
+        --tab-indicator-right: 25%;
+        --panel-padding: 1.5rem 0;
+        --panel-border: none;
+        --panel-border-top: 1px solid #e2e8f0;
+      }
+
+      .theme-colorful tab-group {
+        --color-primary: #ed64a6;
+        --color-hover: #fed7e2;
+        --color-focus: #fbb6ce;
+        --color-border: #ed64a6;
+        --color-border-hover: #d53f8c;
+        --tab-list-background: linear-gradient(135deg, #fed7e2, #fecaca);
+        --tab-list-radius: 0.75rem 0.75rem 0 0;
+        --tab-list-padding: 1rem 1rem 0;
+        --tab-button-radius: 0.5rem 0.5rem 0 0;
+        --tab-active-background: white;
+        --tab-active-transform: scale(1.05);
+        --tab-active-font-weight: 600;
+        --tab-active-color: #d53f8c;
+        --tab-indicator-height: 0;
+        --panel-background: white;
+        --panel-shadow: 0 4px 12px rgba(237, 100, 166, 0.2);
+        --panel-radius: 0 0 0.75rem 0.75rem;
+        --panel-padding: 2rem;
+      }
+
+      /* Instructions area */
+      .instructions {
+        margin-top: 2rem;
+        padding: 1rem;
+        background-color: #f9f9f9;
+        border: 1px solid #ddd;
+        border-radius: 0.25rem;
+      }
+
+      .instructions h3 {
+        margin-bottom: 0.5rem;
+        font-size: 1.2rem;
+      }
+
+      .instructions ul {
+        padding-left: 1.5rem;
+      }
+
+      .instructions li {
+        margin-bottom: 0.25rem;
+      }
+
+      .key {
+        display: inline-block;
+        padding: 0.1rem 0.4rem;
+        border: 1px solid #ccc;
+        border-radius: 0.25rem;
+        background-color: #f0f0f0;
+        font-family: monospace;
+        font-size: 0.8rem;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>Tab Group Web Component</h1>
+      <p>
+        A fully accessible tab group component with keyboard navigation
+        and ARIA support.
+      </p>
+    </header>
+
+    <main>
+      <section id="basic-example">
+        <h2>Basic Example</h2>
+        <p>A simple tab group with default styling.</p>
+
+        <div class="demo-container theme-default">
+          <tab-group>
+            <tab-list>
+              <tab-button>First Tab</tab-button>
+              <tab-button>Second Tab</tab-button>
+              <tab-button>Third Tab</tab-button>
+            </tab-list>
+            <tab-panel>
+              <h3>First Tab Content</h3>
+              <p>This is the content for the first tab.</p>
+              <p>Tab panels can contain any HTML content.</p>
+            </tab-panel>
+            <tab-panel>
+              <h3>Second Tab Content</h3>
+              <p>This is the content for the second tab.</p>
+              <p>You can include images, lists, or other components here.</p>
+              <ul>
+                <li>Item 1</li>
+                <li>Item 2</li>
+                <li>Item 3</li>
+              </ul>
+            </tab-panel>
+            <tab-panel>
+              <h3>Third Tab Content</h3>
+              <p>This is the content for the third tab.</p>
+              <p>Each tab panel is only shown when its corresponding tab is active.</p>
+            </tab-panel>
+          </tab-group>
+        </div>
+      </section>
+
+      <section id="themed-examples">
+        <h2>Themed Examples</h2>
+        <p>
+          The tab group component can be easily themed using CSS variables.
+        </p>
+
+        <div class="theme-selector">
+          <label for="theme-select">Select a theme:</label>
+          <select id="theme-select">
+            <option value="default">Default</option>
+            <option value="dark">Dark</option>
+            <option value="rounded">Rounded</option>
+            <option value="minimal">Minimal</option>
+            <option value="colorful">Colorful</option>
+          </select>
+        </div>
+
+        <div id="theme-demo" class="demo-container theme-default">
+          <tab-group>
+            <tab-list>
+              <tab-button>Features</tab-button>
+              <tab-button>Usage</tab-button>
+              <tab-button>Styling</tab-button>
+            </tab-list>
+            <tab-panel>
+              <h3>Key Features</h3>
+              <ul>
+                <li>Fully accessible with ARIA support</li>
+                <li>Keyboard navigation</li>
+                <li>Customizable with CSS variables</li>
+                <li>Lightweight and dependency-free</li>
+                <li>Easy to integrate into any project</li>
+              </ul>
+            </tab-panel>
+            <tab-panel>
+              <h3>Usage</h3>
+              <p>Import the component and use it in your HTML:</p>
+              <pre><code>&lt;tab-group&gt;
+  &lt;tab-list&gt;
+    &lt;tab-button&gt;Tab 1&lt;/tab-button&gt;
+    &lt;tab-button&gt;Tab 2&lt;/tab-button&gt;
+  &lt;/tab-list&gt;
+  &lt;tab-panel&gt;Panel 1 content&lt;/tab-panel&gt;
+  &lt;tab-panel&gt;Panel 2 content&lt;/tab-panel&gt;
+&lt;/tab-group&gt;</code></pre>
+            </tab-panel>
+            <tab-panel>
+              <h3>Styling</h3>
+              <p>Customize using CSS variables:</p>
+              <pre><code>tab-group {
+  --color-primary: #9f7aea;
+  --border-radius: 1rem;
+  --color-background: #f8f8f8;
+}</code></pre>
+            </tab-panel>
+          </tab-group>
+        </div>
+      </section>
+
+      <section id="keyboard-navigation">
+        <h2>Keyboard Navigation</h2>
+        <p>
+          The tab group component supports complete keyboard navigation
+          for accessibility.
+        </p>
+
+        <div class="instructions">
+          <h3>Keyboard Controls</h3>
+          <ul>
+            <li>
+              <span class="key">Tab</span> to focus the active tab
+            </li>
+            <li>
+              <span class="key">←</span>
+              <span class="key">↑</span> to move to the previous tab
+            </li>
+            <li>
+              <span class="key">→</span>
+              <span class="key">↓</span> to move to the next tab
+            </li>
+            <li>
+              <span class="key">Home</span> to move to the first tab
+            </li>
+            <li>
+              <span class="key">End</span> to move to the last tab
+            </li>
+          </ul>
+        </div>
+
+        <div class="demo-container">
+          <tab-group>
+            <tab-list>
+              <tab-button>Documentation</tab-button>
+              <tab-button>Examples</tab-button>
+              <tab-button>API</tab-button>
+              <tab-button>Support</tab-button>
+            </tab-list>
+            <tab-panel>
+              <h3>Documentation</h3>
+              <p>Comprehensive documentation about how to use the tab group component.</p>
+              <p>Try using the keyboard to navigate between tabs.</p>
+            </tab-panel>
+            <tab-panel>
+              <h3>Examples</h3>
+              <p>Various examples and use cases for the tab group component.</p>
+              <p>These examples showcase different configurations and themes.</p>
+            </tab-panel>
+            <tab-panel>
+              <h3>API</h3>
+              <p>Technical API documentation for developers.</p>
+              <p>Includes methods, properties, and events available on the component.</p>
+            </tab-panel>
+            <tab-panel>
+              <h3>Support</h3>
+              <p>Get help and support for using the tab group component.</p>
+              <p>Contact information and resources for troubleshooting.</p>
+            </tab-panel>
+          </tab-group>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <p>&copy; 2025 Magic Spells. Released under the MIT License.</p>
+    </footer>
+
+    <script>
+      // Theme selector functionality
+      document.addEventListener('DOMContentLoaded', function () {
+        const themeSelect = document.getElementById('theme-select');
+        const themeDemo = document.getElementById('theme-demo');
+        
+        themeSelect.addEventListener('change', function () {
+          themeDemo.className = `demo-container theme-${this.value}`;
+        });
+
+        // Listen for tabchange events
+        document.querySelectorAll('tab-group').forEach(tabGroup => {
+          tabGroup.addEventListener('tabchange', function(event) {
+            console.log('Tab changed:', event.detail);
+            // You can access details like:
+            // event.detail.previousIndex - the index of the previous tab
+            // event.detail.currentIndex - the index of the new current tab
+            // event.detail.previousTab - the previous tab element
+            // event.detail.currentTab - the current tab element
+            // event.detail.previousPanel - the previous panel element
+            // event.detail.currentPanel - the current panel element
+          });
+        });
+      });
+    </script>
+
+    <script src="tab-group.esm.js" type="module"></script>
+  </body>
+</html>

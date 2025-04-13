@@ -1,0 +1,3 @@
+**/*.min.js
+assets/
+node_modules/
