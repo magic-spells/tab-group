@@ -10,7 +10,7 @@
       html * {
         box-sizing: border-box;
       }
-      
+
       body {
         font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
           Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
@@ -58,90 +58,6 @@
         margin: 1rem 0;
       }
 
-      .theme-selector {
-        margin-bottom: 2rem;
-      }
-
-      /* Custom theme examples */
-      .theme-default tab-group {
-        /* Uses default styling */
-      }
-
-      .theme-dark tab-group {
-        --color-background: #2d3748;
-        --color-text: #e2e8f0;
-        --color-border: #4a5568;
-        --color-border-hover: #718096;
-        --color-border-dark: #a0aec0;
-        --color-primary: #4299e1;
-        --color-hover: #1a202c;
-        --color-focus: #2c5282;
-        --panel-background: #1e293b;
-        --panel-border: 1px solid #4a5568;
-        --panel-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
-        --tab-active-color: #63b3ed;
-        --tab-indicator-height: 3px;
-        --tab-indicator-color: #63b3ed;
-      }
-
-      .theme-rounded tab-group {
-        --border-radius: 0.5rem;
-        --color-primary: #9f7aea;
-        --color-focus: #e9d8fd;
-        --tab-button-radius: 999px;
-        --tab-list-padding: 0.75rem 0.5rem 0;
-        --tab-list-gap: 0.5rem;
-        --panel-radius: 1rem;
-        --panel-shadow: 0 4px 12px rgba(159, 122, 234, 0.15);
-        --panel-border: 1px solid #e9d8fd;
-        --panel-padding: 1.5rem;
-        --tab-active-background: #9f7aea;
-        --tab-active-color: white;
-        --tab-active-font-weight: 500;
-        --tab-active-transform: translateY(-3px);
-        --tab-active-shadow: 0 4px 8px rgba(159, 122, 234, 0.3);
-        --tab-indicator-height: 0;
-      }
-
-      .theme-minimal tab-group {
-        --border-radius: 0;
-        --color-border: #e2e8f0;
-        --color-border-hover: #cbd5e0;
-        --color-primary: #718096;
-        --box-shadow: none;
-        --tab-list-padding: 0;
-        --tab-button-radius: 0;
-        --tab-list-border-bottom: none;
-        --tab-indicator-height: 2px;
-        --tab-indicator-left: 25%;
-        --tab-indicator-right: 25%;
-        --panel-padding: 1.5rem 0;
-        --panel-border: none;
-        --panel-border-top: 1px solid #e2e8f0;
-      }
-
-      .theme-colorful tab-group {
-        --color-primary: #ed64a6;
-        --color-hover: #fed7e2;
-        --color-focus: #fbb6ce;
-        --color-border: #ed64a6;
-        --color-border-hover: #d53f8c;
-        --tab-list-background: linear-gradient(135deg, #fed7e2, #fecaca);
-        --tab-list-radius: 0.75rem 0.75rem 0 0;
-        --tab-list-padding: 1rem 1rem 0;
-        --tab-button-radius: 0.5rem 0.5rem 0 0;
-        --tab-active-background: white;
-        --tab-active-transform: scale(1.05);
-        --tab-active-font-weight: 600;
-        --tab-active-color: #d53f8c;
-        --tab-indicator-height: 0;
-        --panel-background: white;
-        --panel-shadow: 0 4px 12px rgba(237, 100, 166, 0.2);
-        --panel-radius: 0 0 0.75rem 0.75rem;
-        --panel-padding: 2rem;
-      }
-
-      /* Instructions area */
       .instructions {
         margin-top: 2rem;
         padding: 1rem;
@@ -173,6 +89,41 @@
         font-size: 0.8rem;
         box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
       }
+
+      /*
+        Example: styling the tab component yourself.
+        The component ships only structural CSS (display, overflow, hidden state).
+        All visual styles are yours to define.
+      */
+      tab-list {
+        gap: 0.25rem;
+        border-bottom: 1px solid #ddd;
+        padding: 0 0.5rem;
+      }
+
+      tab-button {
+        padding: 0.5rem 1rem;
+        font: inherit;
+        background: none;
+        border: none;
+        border-bottom: 2px solid transparent;
+        color: #555;
+        transition: color 0.15s, border-color 0.15s;
+      }
+
+      tab-button:hover {
+        color: #111;
+      }
+
+      tab-button[aria-selected="true"] {
+        color: #3366ff;
+        border-bottom-color: #3366ff;
+        font-weight: 500;
+      }
+
+      tab-panel {
+        padding: 1rem 0.5rem;
+      }
     </style>
   </head>
   <body>
@@ -180,16 +131,16 @@
       <h1>Tab Group Web Component</h1>
       <p>
         A fully accessible tab group component with keyboard navigation
-        and ARIA support.
+        and ARIA support. Ships only structural CSS — you bring your own styles.
       </p>
     </header>
 
     <main>
       <section id="basic-example">
         <h2>Basic Example</h2>
-        <p>A simple tab group with default styling.</p>
+        <p>A simple tab group styled with plain CSS.</p>
 
-        <div class="demo-container theme-default">
+        <div class="demo-container">
           <tab-group>
             <tab-list>
               <tab-button>First Tab</tab-button>
@@ -220,63 +171,31 @@
         </div>
       </section>
 
-      <section id="themed-examples">
-        <h2>Themed Examples</h2>
+      <section id="styling">
+        <h2>Styling</h2>
         <p>
-          The tab group component can be easily themed using CSS variables.
+          The component ships zero cosmetic styles. Target the custom elements
+          and ARIA attributes directly:
         </p>
+        <pre><code>tab-list {
+  gap: 0.25rem;
+  border-bottom: 1px solid #ddd;
+}
 
-        <div class="theme-selector">
-          <label for="theme-select">Select a theme:</label>
-          <select id="theme-select">
-            <option value="default">Default</option>
-            <option value="dark">Dark</option>
-            <option value="rounded">Rounded</option>
-            <option value="minimal">Minimal</option>
-            <option value="colorful">Colorful</option>
-          </select>
-        </div>
+tab-button {
+  padding: 0.5rem 1rem;
+  border-bottom: 2px solid transparent;
+}
 
-        <div id="theme-demo" class="demo-container theme-default">
-          <tab-group>
-            <tab-list>
-              <tab-button>Features</tab-button>
-              <tab-button>Usage</tab-button>
-              <tab-button>Styling</tab-button>
-            </tab-list>
-            <tab-panel>
-              <h3>Key Features</h3>
-              <ul>
-                <li>Fully accessible with ARIA support</li>
-                <li>Keyboard navigation</li>
-                <li>Customizable with CSS variables</li>
-                <li>Lightweight and dependency-free</li>
-                <li>Easy to integrate into any project</li>
-              </ul>
-            </tab-panel>
-            <tab-panel>
-              <h3>Usage</h3>
-              <p>Import the component and use it in your HTML:</p>
-              <pre><code>&lt;tab-group&gt;
-  &lt;tab-list&gt;
-    &lt;tab-button&gt;Tab 1&lt;/tab-button&gt;
-    &lt;tab-button&gt;Tab 2&lt;/tab-button&gt;
-  &lt;/tab-list&gt;
-  &lt;tab-panel&gt;Panel 1 content&lt;/tab-panel&gt;
-  &lt;tab-panel&gt;Panel 2 content&lt;/tab-panel&gt;
-&lt;/tab-group&gt;</code></pre>
-            </tab-panel>
-            <tab-panel>
-              <h3>Styling</h3>
-              <p>Customize using CSS variables:</p>
-              <pre><code>tab-group {
-  --color-primary: #9f7aea;
-  --border-radius: 1rem;
-  --color-background: #f8f8f8;
+tab-button[aria-selected="true"] {
+  color: #3366ff;
+  border-bottom-color: #3366ff;
+}
+
+tab-panel {
+  padding: 1rem;
 }</code></pre>
-            </tab-panel>
-          </tab-group>
-        </div>
+        <p>Or use Tailwind utility classes — no overrides needed.</p>
       </section>
 
       <section id="keyboard-navigation">
@@ -325,7 +244,7 @@
             <tab-panel>
               <h3>Examples</h3>
               <p>Various examples and use cases for the tab group component.</p>
-              <p>These examples showcase different configurations and themes.</p>
+              <p>These examples showcase different configurations.</p>
             </tab-panel>
             <tab-panel>
               <h3>API</h3>
@@ -347,26 +266,11 @@
     </footer>
 
     <script>
-      // Theme selector functionality
+      // Listen for tabchange events
       document.addEventListener('DOMContentLoaded', function () {
-        const themeSelect = document.getElementById('theme-select');
-        const themeDemo = document.getElementById('theme-demo');
-        
-        themeSelect.addEventListener('change', function () {
-          themeDemo.className = `demo-container theme-${this.value}`;
-        });
-
-        // Listen for tabchange events
         document.querySelectorAll('tab-group').forEach(tabGroup => {
           tabGroup.addEventListener('tabchange', function(event) {
             console.log('Tab changed:', event.detail);
-            // You can access details like:
-            // event.detail.previousIndex - the index of the previous tab
-            // event.detail.currentIndex - the index of the new current tab
-            // event.detail.previousTab - the previous tab element
-            // event.detail.currentTab - the current tab element
-            // event.detail.previousPanel - the previous panel element
-            // event.detail.currentPanel - the current panel element
           });
         });
       });

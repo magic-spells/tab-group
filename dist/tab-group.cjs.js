@@ -263,11 +263,11 @@ class TabPanel extends HTMLElement {
 	}
 }
 
-// define the custom elements
-customElements.define("tab-group", TabGroup);
-customElements.define("tab-list", TabList);
-customElements.define("tab-button", TabButton);
-customElements.define("tab-panel", TabPanel);
+// define the custom elements (guarded against double-registration)
+if (!customElements.get("tab-group")) customElements.define("tab-group", TabGroup);
+if (!customElements.get("tab-list")) customElements.define("tab-list", TabList);
+if (!customElements.get("tab-button")) customElements.define("tab-button", TabButton);
+if (!customElements.get("tab-panel")) customElements.define("tab-panel", TabPanel);
 
 exports.TabGroup = TabGroup;
 exports.default = TabGroup;

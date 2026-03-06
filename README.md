@@ -1,46 +1,35 @@
-# ✨ Tab Group
+# Tab Group
 
 ![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)
 ![Version](https://img.shields.io/badge/version-0.1.0-brightgreen)
 
-A lightweight, accessible tab interface web component with keyboard navigation and rich customization options.
+A lightweight, accessible tab interface web component with keyboard navigation. Ships only structural CSS — you bring your own styles.
 
-🔍 **[Live Demo](https://magic-spells.github.io/tab-group/demo/)** - See it in action!
+[Live Demo](https://magic-spells.github.io/tab-group/demo/) - See it in action!
 
-## 🚀 Features
+## Features
 
 - **Fully Accessible** - Built following WAI-ARIA Tab pattern guidelines
 - **Custom Events** - Listen for tab changes with detailed event data
 - **Keyboard Navigation** - Complete keyboard support for accessibility
 - **Auto Consistency** - Ensures tab buttons and panels stay in sync
-- **Theme Support** - Extensive CSS variable customization
+- **Zero Opinions** - No cosmetic CSS; style it however you want
 - **Zero Dependencies** - Lightweight and standalone
 - **Easy Integration** - Works with any framework or vanilla JS
 
-## 📦 Installation
+## Installation
 
 ```bash
-# npm
 npm install @magic-spells/tab-group
-
-# yarn
-yarn add @magic-spells/tab-group
-
-# pnpm
-pnpm add @magic-spells/tab-group
 ```
 
-## 🔧 Usage
-
-### Basic Implementation
+## Usage
 
 ```html
-<!-- Import the component -->
 <script type="module">
   import '@magic-spells/tab-group';
 </script>
 
-<!-- Use the component -->
 <tab-group>
   <tab-list>
     <tab-button>First Tab</tab-button>
@@ -71,190 +60,50 @@ pnpm add @magic-spells/tab-group
 document
   .querySelector('tab-group')
   .addEventListener('tabchange', (event) => {
-    console.log('Tab changed!');
-
-    // Access detailed event data
-    const {
-      previousIndex, // Index of previous tab
-      currentIndex, // Index of current tab
-      previousTab, // Previous tab element
-      currentTab, // Current tab element
-      previousPanel, // Previous panel element
-      currentPanel, // Current panel element
-    } = event.detail;
-
-    // Do something with the data
-    console.log(
-      `Changed from tab ${previousIndex} to tab ${currentIndex}`
-    );
+    const { previousIndex, currentIndex } = event.detail;
+    console.log(`Changed from tab ${previousIndex} to tab ${currentIndex}`);
   });
 ```
 
-## 🎨 Styling
+## Styling
 
-### CSS Variables
-
-The Tab Group component can be extensively customized using CSS variables:
+The component ships only structural CSS (display modes, overflow, hidden state). All visual styling is yours. Target the custom elements and ARIA attributes directly:
 
 ```css
-tab-group {
-  /* Base colors */
-  --color-background: #ffffff;
-  --color-text: #333333;
-  --color-border: #dddddd;
-  --color-border-hover: #bbbbbb;
-  --color-primary: #3366ff;
-  --color-hover: #f0f5ff;
-  --color-focus: #b3cbff;
+tab-list {
+  gap: 0.25rem;
+  border-bottom: 1px solid #ddd;
+}
 
-  /* Panel styling */
-  --panel-background: white;
-  --panel-border: 1px solid var(--color-border);
-  --panel-padding: 1rem;
-  --panel-radius: 0 0 0.5rem 0.5rem;
-  --panel-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+tab-button {
+  padding: 0.5rem 1rem;
+  border-bottom: 2px solid transparent;
+}
 
-  /* Tab list styling */
-  --tab-list-gap: 0.25rem;
-  --tab-list-padding: 0.5rem 0.5rem 0;
-  --tab-list-background: transparent;
-  --tab-list-border-bottom: 1px solid var(--color-border);
-  --tab-list-radius: 0.5rem 0.5rem 0 0;
+tab-button[aria-selected="true"] {
+  color: #3366ff;
+  border-bottom-color: #3366ff;
+}
 
-  /* Tab button styling */
-  --tab-button-radius: 0.25rem 0.25rem 0 0;
-  --tab-active-background: white;
-  --tab-active-color: var(--color-primary);
-  --tab-active-font-weight: 500;
-  --tab-active-shadow: none;
-  --tab-active-transform: translateY(0);
-
-  /* Tab indicator styling */
-  --tab-indicator-height: 2px;
-  --tab-indicator-color: var(--color-primary);
-  --tab-indicator-left: 0;
-  --tab-indicator-right: 0;
+tab-panel {
+  padding: 1rem;
 }
 ```
 
-### SCSS Integration
+Or use Tailwind utility classes — no overrides needed.
 
-This package provides multiple ways to integrate with your SCSS workflow:
-
-```scss
-// Option 1: Use the main entry point (recommended)
-@use "@magic-spells/tab-group/scss" with (
-  $color-primary: #3366ff,
-  $border-radius: 0.5rem
-);
-
-// Option 2: Import individual files
-@use "@magic-spells/tab-group/scss/variables" with (
-  $color-primary: #3366ff,
-  $border-radius: 0.5rem
-);
-@use "@magic-spells/tab-group/scss/tab-group";
-
-// Option 3: Direct paths (if needed)
-@use "node_modules/@magic-spells/tab-group/dist/tab-group.scss";
-@use "node_modules/@magic-spells/tab-group/dist/scss/tab-group";
-```
-
-#### Available SCSS Variables
-
-You can customize the appearance by overriding these SCSS variables:
-
-```scss
-// Colors
-$color-background: #ffffff !default;
-$color-text: #333333 !default;
-$color-border: #dddddd !default;
-$color-border-hover: #bbbbbb !default;
-$color-border-dark: #999999 !default;
-$color-primary: #3366ff !default;
-$color-hover: #f0f5ff !default;
-$color-focus: #b3cbff !default;
-
-// Border radius
-$border-radius: 0.5rem !default;
-
-// Box shadow
-$box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !default;
-
-// Tab list
-$tab-list-gap: 0.25rem !default;
-$tab-list-padding: 0.5rem 0.5rem 0 !default;
-$tab-list-background: transparent !default;
-$tab-list-border-bottom: 1px solid $color-border !default;
-$tab-list-radius: $border-radius $border-radius 0 0 !default;
-
-// Tab button
-$tab-button-radius: 0.25rem 0.25rem 0 0 !default;
-$tab-active-background: white !default;
-$tab-active-color: $color-primary !default;
-$tab-active-font-weight: 500 !default;
-$tab-active-shadow: none !default;
-$tab-active-transform: translateY(0) !default;
-
-// Tab indicator
-$tab-indicator-height: 2px !default;
-$tab-indicator-color: $color-primary !default;
-$tab-indicator-left: 0 !default;
-$tab-indicator-right: 0 !default;
-
-// Panel
-$panel-background: white !default;
-$panel-border: 1px solid $color-border !default;
-$panel-padding: 1rem !default;
-$panel-radius: 0 0 $border-radius $border-radius !default;
-$panel-shadow: $box-shadow !default;
-```
-
-## 🌈 Theme Examples
-
-### Dark Theme
+### What the component CSS includes
 
 ```css
-tab-group {
-  --color-background: #2d3748;
-  --color-text: #e2e8f0;
-  --color-border: #4a5568;
-  --color-border-hover: #718096;
-  --color-primary: #4299e1;
-  --color-hover: #1a202c;
-  --color-focus: #2c5282;
-  --panel-background: #1e293b;
-  --panel-border: 1px solid #4a5568;
-  --panel-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
-  --tab-active-color: #63b3ed;
-  --tab-indicator-color: #63b3ed;
-}
+tab-group  { display: block; }
+tab-list   { display: flex; overflow-x: auto; overflow-y: hidden; }
+tab-button { display: block; cursor: pointer; user-select: none; }
+tab-panel[hidden] { display: none; }
 ```
 
-### Rounded Pills Theme
+That's it. No fonts, colors, spacing, borders, transitions, shadows, or media queries.
 
-```css
-tab-group {
-  --border-radius: 0.5rem;
-  --color-primary: #9f7aea;
-  --color-focus: #e9d8fd;
-  --tab-button-radius: 999px;
-  --tab-list-padding: 0.75rem 0.5rem 0;
-  --tab-list-gap: 0.5rem;
-  --panel-radius: 1rem;
-  --panel-shadow: 0 4px 12px rgba(159, 122, 234, 0.15);
-  --panel-border: 1px solid #e9d8fd;
-  --panel-padding: 1.5rem;
-  --tab-active-background: #9f7aea;
-  --tab-active-color: white;
-  --tab-active-font-weight: 500;
-  --tab-active-transform: translateY(-3px);
-  --tab-active-shadow: 0 4px 8px rgba(159, 122, 234, 0.3);
-  --tab-indicator-height: 0;
-}
-```
-
-## ⌨️ Accessibility
+## Accessibility
 
 The Tab Group component follows the [WAI-ARIA Tabs Pattern](https://www.w3.org/WAI/ARIA/apg/patterns/tabs/) with:
 
@@ -266,7 +115,7 @@ The Tab Group component follows the [WAI-ARIA Tabs Pattern](https://www.w3.org/W
   - `Home` to move to the first tab
   - `End` to move to the last tab
 
-## 🛠️ API Reference
+## API Reference
 
 ### Components
 
@@ -283,16 +132,16 @@ The Tab Group component follows the [WAI-ARIA Tabs Pattern](https://www.w3.org/W
 | ----------- | --------------------------------------------------------------------------------------- | --------------------------------- |
 | `tabchange` | `{ previousIndex, currentIndex, previousTab, currentTab, previousPanel, currentPanel }` | Fired when the active tab changes |
 
-## 🌟 Examples
+## Examples
 
 Check out more examples in the [demo directory](https://github.com/magic-spells/tab-group/tree/main/demo).
 
-## 📄 License
+## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ---
 
 <p align="center">
-  Made with ✨ by <a href="https://github.com/cory-schulz">Cory Schulz</a>
+  Made with magic by <a href="https://github.com/cory-schulz">Cory Schulz</a>
 </p>

@@ -7,30 +7,20 @@ import postcss from 'rollup-plugin-postcss';
 const dev = process.env.ROLLUP_WATCH;
 const name = 'tab-group';
 
-// Shared CSS/SCSS plugin config
+// Shared CSS plugin config
 const cssPlugin = postcss({
   extract: `${name}.css`,
   minimize: false,
   sourceMap: dev,
-  extensions: ['.scss', '.css'],
-  use: ['sass'],
+  extensions: ['.css'],
 });
 
-// Shared CSS/SCSS plugin config (minimized version)
+// Shared CSS plugin config (minimized version)
 const cssMinPlugin = postcss({
   extract: `${name}.min.css`,
   minimize: true,
   sourceMap: dev,
-  extensions: ['.scss', '.css'],
-  use: ['sass'],
-});
-
-// Shared copy plugin for SCSS files
-const copyScssPlugin = copy({
-  targets: [
-    { src: 'src/scss/*', dest: 'dist/scss' },
-    { src: 'src/index.scss', dest: 'dist', rename: `${name}.scss` }
-  ],
+  extensions: ['.css'],
 });
 
 export default [
@@ -43,9 +33,8 @@ export default [
       sourcemap: true,
     },
     plugins: [
-      resolve(), 
+      resolve(),
       cssPlugin,
-      copyScssPlugin
     ],
   },
   // CommonJS build

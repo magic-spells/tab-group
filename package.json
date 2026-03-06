@@ -9,7 +9,6 @@
   "module": "dist/tab-group.esm.js",
   "unpkg": "dist/tab-group.min.js",
   "style": "dist/tab-group.min.css",
-  "sass": "dist/tab-group.scss",
   "exports": {
     ".": {
       "import": "./dist/tab-group.esm.js",
@@ -17,9 +16,7 @@
       "default": "./dist/tab-group.esm.js"
     },
     "./css": "./dist/tab-group.css",
-    "./css/min": "./dist/tab-group.min.css",
-    "./scss": "./dist/tab-group.scss",
-    "./scss/*": "./dist/scss/*"
+    "./css/min": "./dist/tab-group.min.css"
   },
   "sideEffects": true,
   "repository": {
@@ -27,8 +24,7 @@
     "url": "git+https://github.com/magic-spells/tab-group.git"
   },
   "files": [
-    "dist/",
-    "src/"
+    "dist/"
   ],
   "publishConfig": {
     "access": "public",
@@ -40,17 +36,17 @@
     "not ie <= 11"
   ],
   "devDependencies": {
-    "@eslint/js": "^8.57.0",
+    "@eslint/js": "^9.38.0",
     "@rollup/plugin-node-resolve": "^15.2.3",
-    "@rollup/plugin-terser": "^0.4.4",
-    "eslint": "^8.0.0",
-    "globals": "^13.24.0",
+    "@rollup/plugin-terser": "^1.0.0",
+    "caniuse-lite": "^1.0.30001777",
+    "eslint": "^9.38.0",
+    "globals": "^15.15.0",
     "prettier": "^3.3.3",
     "rollup": "^3.0.0",
     "rollup-plugin-copy": "^3.5.0",
     "rollup-plugin-postcss": "^4.0.2",
-    "rollup-plugin-serve": "^1.1.1",
-    "sass": "^1.86.3"
+    "rollup-plugin-serve": "^1.1.1"
   },
   "scripts": {
     "build": "rollup -c",
