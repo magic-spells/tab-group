@@ -137,6 +137,7 @@ class TabGroup extends HTMLElement {
 	 * @param {number} index - index of the tab to activate
 	 */
 	setActiveTab(index) {
+		if (index < 0 || index >= this.tabButtons.length) return;
 		const previousIndex = this.tabButtons.findIndex(
 			(tab) => tab.getAttribute('aria-selected') === 'true'
 		);

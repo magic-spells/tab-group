@@ -8,6 +8,7 @@
   "main": "dist/tab-group.cjs.js",
   "module": "dist/tab-group.esm.js",
   "unpkg": "dist/tab-group.min.js",
+  "types": "dist/tab-group.d.ts",
   "style": "dist/tab-group.min.css",
   "exports": {
     ".": {
