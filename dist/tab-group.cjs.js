@@ -32,23 +32,23 @@ class TabGroup extends HTMLElement {
 	 */
 	ensureConsistentTabsAndPanels() {
 		// get current tabs and panels within the tab group
-		let tabs = this.querySelectorAll("tab-button");
-		let panels = this.querySelectorAll("tab-panel");
+		let tabs = this.querySelectorAll('tab-button');
+		let panels = this.querySelectorAll('tab-panel');
 
 		// if there are more panels than tabs
 		if (panels.length > tabs.length) {
 			const difference = panels.length - tabs.length;
 			// try to find a <tab-list> to insert new tabs
-			let tabList = this.querySelector("tab-list");
+			let tabList = this.querySelector('tab-list');
 			if (!tabList) {
 				// if not present, create one and insert it at the beginning
-				tabList = document.createElement("tab-list");
+				tabList = document.createElement('tab-list');
 				this.insertBefore(tabList, this.firstChild);
 			}
 			// inject extra <tab-button> elements into the tab list
 			for (let i = 0; i < difference; i++) {
-				const newTab = document.createElement("tab-button");
-				newTab.textContent = "default tab";
+				const newTab = document.createElement('tab-button');
+				newTab.textContent = 'default tab';
 				tabList.appendChild(newTab);
 			}
 		}
@@ -57,8 +57,8 @@ class TabGroup extends HTMLElement {
 			const difference = tabs.length - panels.length;
 			// inject extra <tab-panel> elements at the end of the tab group
 			for (let i = 0; i < difference; i++) {
-				const newPanel = document.createElement("tab-panel");
-				newPanel.innerHTML = "<p>default panel content</p>";
+				const newPanel = document.createElement('tab-panel');
+				newPanel.innerHTML = '<p>default panel content</p>';
 				this.appendChild(newPanel);
 			}
 		}
@@ -71,14 +71,16 @@ class TabGroup extends HTMLElement {
 		const _ = this;
 
 		// find the <tab-list> element (should be exactly one)
-		_.tabList = _.querySelector("tab-list");
+		_.tabList = _.querySelector('tab-list');
 		if (!_.tabList) return;
 
 		// find all <tab-button> elements inside the <tab-list>
-		_.tabButtons = Array.from(_.tabList.querySelectorAll("tab-button"));
+		_.tabButtons = Array.from(
+			_.tabList.querySelectorAll('tab-button')
+		);
 
 		// find all <tab-panel> elements inside the <tab-group>
-		_.tabPanels = Array.from(_.querySelectorAll("tab-panel"));
+		_.tabPanels = Array.from(_.querySelectorAll('tab-panel'));
 
 		// initialize each tab-button with roles, ids and aria attributes
 		_.tabButtons.forEach((tab, index) => {
@@ -90,16 +92,16 @@ class TabGroup extends HTMLElement {
 
 			// generate a corresponding panel id, e.g. "panel-0"
 			const panelId = `panel-${tabIndex}`;
-			tab.setAttribute("role", "tab");
-			tab.setAttribute("aria-controls", panelId);
+			tab.setAttribute('role', 'tab');
+			tab.setAttribute('aria-controls', panelId);
 
 			// first tab is active by default
 			if (index === 0) {
-				tab.setAttribute("aria-selected", "true");
-				tab.setAttribute("tabindex", "0");
+				tab.setAttribute('aria-selected', 'true');
+				tab.setAttribute('tabindex', '0');
 			} else {
-				tab.setAttribute("aria-selected", "false");
-				tab.setAttribute("tabindex", "-1");
+				tab.setAttribute('aria-selected', 'false');
+				tab.setAttribute('tabindex', '-1');
 			}
 		});
 
@@ -109,17 +111,17 @@ class TabGroup extends HTMLElement {
 			const panelId = `panel-${panelIndex}`;
 			panel.id = panelId;
 
-			panel.setAttribute("role", "tabpanel");
-			panel.setAttribute("aria-labelledby", `tab-${panelIndex}`);
+			panel.setAttribute('role', 'tabpanel');
+			panel.setAttribute('aria-labelledby', `tab-${panelIndex}`);
 
 			// hide panels except for the first one
 			panel.hidden = index !== 0;
 		});
 
 		// set up keyboard navigation and click delegation on the <tab-list>
-		_.tabList.setAttribute("role", "tablist");
-		_.tabList.addEventListener("keydown", (e) => _.onKeyDown(e));
-		_.tabList.addEventListener("click", (e) => _.onClick(e));
+		_.tabList.setAttribute('role', 'tablist');
+		_.tabList.addEventListener('keydown', (e) => _.onKeyDown(e));
+		_.tabList.addEventListener('click', (e) => _.onClick(e));
 	}
 
 	/**
@@ -129,13 +131,15 @@ class TabGroup extends HTMLElement {
 	 */
 	setActiveTab(index) {
 		const _ = this;
-		const previousIndex = _.tabButtons.findIndex(tab => tab.getAttribute("aria-selected") === "true");
+		const previousIndex = _.tabButtons.findIndex(
+			(tab) => tab.getAttribute('aria-selected') === 'true'
+		);
 
 		// update each tab-button
 		_.tabButtons.forEach((tab, i) => {
 			const isActive = i === index;
-			tab.setAttribute("aria-selected", isActive ? "true" : "false");
-			tab.setAttribute("tabindex", isActive ? "0" : "-1");
+			tab.setAttribute('aria-selected', isActive ? 'true' : 'false');
+			tab.setAttribute('tabindex', isActive ? '0' : '-1');
 			if (isActive) {
 				tab.focus();
 			}
@@ -154,9 +158,11 @@ class TabGroup extends HTMLElement {
 				previousTab: _.tabButtons[previousIndex],
 				currentTab: _.tabButtons[index],
 				previousPanel: _.tabPanels[previousIndex],
-				currentPanel: _.tabPanels[index]
+				currentPanel: _.tabPanels[index],
 			};
-			_.dispatchEvent(new CustomEvent('tabchange', { detail, bubbles: true }));
+			_.dispatchEvent(
+				new CustomEvent('tabchange', { detail, bubbles: true })
+			);
 		}
 	}
 
@@ -168,7 +174,7 @@ class TabGroup extends HTMLElement {
 	onClick(e) {
 		const _ = this;
 		// check if the click occurred on or within a <tab-button>
-		const tabButton = e.target.closest("tab-button");
+		const tabButton = e.target.closest('tab-button');
 		if (!tabButton) return;
 
 		// determine the index of the clicked tab-button
@@ -192,24 +198,25 @@ class TabGroup extends HTMLElement {
 
 		let newIndex = targetIndex;
 		switch (e.key) {
-			case "ArrowLeft":
-			case "ArrowUp":
+			case 'ArrowLeft':
+			case 'ArrowUp':
 				// move to the previous tab (wrap around if necessary)
-				newIndex = targetIndex > 0 ? targetIndex - 1 : _.tabButtons.length - 1;
+				newIndex =
+					targetIndex > 0 ? targetIndex - 1 : _.tabButtons.length - 1;
 				e.preventDefault();
 				break;
-			case "ArrowRight":
-			case "ArrowDown":
+			case 'ArrowRight':
+			case 'ArrowDown':
 				// move to the next tab (wrap around if necessary)
 				newIndex = (targetIndex + 1) % _.tabButtons.length;
 				e.preventDefault();
 				break;
-			case "Home":
+			case 'Home':
 				// jump to the first tab
 				newIndex = 0;
 				e.preventDefault();
 				break;
-			case "End":
+			case 'End':
 				// jump to the last tab
 				newIndex = _.tabButtons.length - 1;
 				e.preventDefault();
@@ -229,10 +236,6 @@ class TabList extends HTMLElement {
 	constructor() {
 		super();
 	}
-
-	connectedCallback() {
-		// additional logic or styling can be added here if desired
-	}
 }
 
 /**
@@ -242,10 +245,6 @@ class TabList extends HTMLElement {
 class TabButton extends HTMLElement {
 	constructor() {
 		super();
-	}
-
-	connectedCallback() {
-		// note: role and other attributes are handled by the parent
 	}
 }
 
@@ -257,17 +256,17 @@ class TabPanel extends HTMLElement {
 	constructor() {
 		super();
 	}
-
-	connectedCallback() {
-		// note: role and other attributes are handled by the parent
-	}
 }
 
 // define the custom elements (guarded against double-registration)
-if (!customElements.get("tab-group")) customElements.define("tab-group", TabGroup);
-if (!customElements.get("tab-list")) customElements.define("tab-list", TabList);
-if (!customElements.get("tab-button")) customElements.define("tab-button", TabButton);
-if (!customElements.get("tab-panel")) customElements.define("tab-panel", TabPanel);
+if (!customElements.get('tab-group'))
+	customElements.define('tab-group', TabGroup);
+if (!customElements.get('tab-list'))
+	customElements.define('tab-list', TabList);
+if (!customElements.get('tab-button'))
+	customElements.define('tab-button', TabButton);
+if (!customElements.get('tab-panel'))
+	customElements.define('tab-panel', TabPanel);
 
 exports.TabGroup = TabGroup;
 exports.default = TabGroup;
