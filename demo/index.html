@@ -1,275 +1,1093 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Tab Group Demo</title>
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0" />
+    <title>Tab Group -- @magic-spells</title>
     <link rel="stylesheet" href="tab-group.min.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      rel="preconnect"
+      href="https://fonts.gstatic.com"
+      crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300;1,9..40,400&family=DM+Mono:wght@300;400&display=swap"
+      rel="stylesheet" />
     <style>
-      /* Demo page styles */
-      html * {
+      /* ------------------------------------------------
+         Base & Page
+      ------------------------------------------------ */
+      *,
+      *::before,
+      *::after {
         box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      :root {
+        --bg: #0c0c0d;
+        --surface: #161618;
+        --surface-raised: #1e1e21;
+        --border: #2a2a2e;
+        --text: #e8e4de;
+        --text-dim: #8a8680;
+        --accent: #d4a24e;
+        --accent-glow: rgba(212, 162, 78, 0.15);
+        --coral: #c75d4a;
+        --teal: #4a9e8e;
+        --lavender: #8b7ec8;
+        --font-display: 'Instrument Serif', Georgia, serif;
+        --font-body: 'DM Sans', system-ui, sans-serif;
+        --font-mono: 'DM Mono', 'SF Mono', monospace;
+        --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+      }
+
+      html {
+        font-size: 16px;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
       }
 
       body {
-        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
-          Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-        padding: 2rem;
-        max-width: 800px;
+        font-family: var(--font-body);
+        font-weight: 300;
+        color: var(--text);
+        background: var(--bg);
+        line-height: 1.6;
+        min-height: 100vh;
+      }
+
+      /* Grain overlay */
+      body::before {
+        content: '';
+        position: fixed;
+        inset: 0;
+        z-index: 9999;
+        pointer-events: none;
+        opacity: 0.03;
+        background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+        background-repeat: repeat;
+        background-size: 200px;
+      }
+
+      /* ------------------------------------------------
+         Layout
+      ------------------------------------------------ */
+      .page {
+        max-width: 840px;
         margin: 0 auto;
-        background-color: #f5f5f5;
-        color: #333;
+        padding: 4rem 2rem 6rem;
       }
 
-      h1, h2 {
-        margin-bottom: 1rem;
+      /* ------------------------------------------------
+         Hero
+      ------------------------------------------------ */
+      .hero {
+        padding-bottom: 4rem;
+        border-bottom: 1px solid var(--border);
+        margin-bottom: 4rem;
+        animation: fadeUp 0.8s var(--ease-out) both;
       }
 
-      p {
-        margin-bottom: 1.5rem;
-        line-height: 1.5;
-      }
-
-      section {
-        margin-bottom: 3rem;
-        padding: 1.5rem;
-        background-color: white;
-        border-radius: 0.5rem;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-      }
-
-      .demo-container {
-        margin: 2rem 0;
-      }
-
-      code {
-        font-family: monospace;
-        background-color: #f2f2f2;
-        padding: 0.2rem 0.4rem;
-        border-radius: 0.25rem;
-        font-size: 0.9em;
-      }
-
-      pre {
-        background-color: #f8f8f8;
-        padding: 1rem;
-        border-radius: 0.25rem;
-        overflow-x: auto;
-        margin: 1rem 0;
-      }
-
-      .instructions {
-        margin-top: 2rem;
-        padding: 1rem;
-        background-color: #f9f9f9;
-        border: 1px solid #ddd;
-        border-radius: 0.25rem;
-      }
-
-      .instructions h3 {
-        margin-bottom: 0.5rem;
-        font-size: 1.2rem;
-      }
-
-      .instructions ul {
-        padding-left: 1.5rem;
-      }
-
-      .instructions li {
-        margin-bottom: 0.25rem;
-      }
-
-      .key {
+      .hero-badge {
         display: inline-block;
-        padding: 0.1rem 0.4rem;
-        border: 1px solid #ccc;
-        border-radius: 0.25rem;
-        background-color: #f0f0f0;
-        font-family: monospace;
-        font-size: 0.8rem;
-        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        font-family: var(--font-mono);
+        font-size: 0.75rem;
+        font-weight: 400;
+        letter-spacing: 0.08em;
+        color: var(--accent);
+        border: 1px solid var(--accent);
+        border-radius: 100px;
+        padding: 0.3rem 1rem;
+        margin-bottom: 1.5rem;
+        background: var(--accent-glow);
       }
 
-      /*
-        Example: styling the tab component yourself.
-        The component ships only structural CSS (display, overflow, hidden state).
-        All visual styles are yours to define.
-      */
-      tab-list {
-        gap: 0.25rem;
-        border-bottom: 1px solid #ddd;
-        padding: 0 0.5rem;
+      .hero h1 {
+        font-family: var(--font-display);
+        font-size: clamp(2.8rem, 6vw, 4.2rem);
+        font-weight: 400;
+        line-height: 1.1;
+        letter-spacing: -0.02em;
+        margin-bottom: 1.25rem;
       }
 
-      tab-button {
-        padding: 0.5rem 1rem;
-        font: inherit;
+      .hero h1 em {
+        font-style: italic;
+        color: var(--accent);
+      }
+
+      .hero p {
+        font-size: 1.1rem;
+        color: var(--text-dim);
+        max-width: 540px;
+        line-height: 1.7;
+      }
+
+      /* ------------------------------------------------
+         Sections
+      ------------------------------------------------ */
+      .example {
+        margin-bottom: 5rem;
+        animation: fadeUp 0.8s var(--ease-out) both;
+      }
+
+      .example:nth-child(2) {
+        animation-delay: 0.1s;
+      }
+      .example:nth-child(3) {
+        animation-delay: 0.2s;
+      }
+      .example:nth-child(4) {
+        animation-delay: 0.3s;
+      }
+      .example:nth-child(5) {
+        animation-delay: 0.4s;
+      }
+
+      .example-label {
+        font-family: var(--font-mono);
+        font-size: 0.7rem;
+        font-weight: 400;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--text-dim);
+        margin-bottom: 0.75rem;
+      }
+
+      .example h2 {
+        font-family: var(--font-display);
+        font-size: 1.8rem;
+        font-weight: 400;
+        margin-bottom: 0.5rem;
+      }
+
+      .example > p {
+        color: var(--text-dim);
+        font-size: 0.95rem;
+        margin-bottom: 2rem;
+        max-width: 520px;
+      }
+
+      .demo-surface {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 2rem;
+        position: relative;
+        overflow: hidden;
+      }
+
+      /* Subtle corner glow */
+      .demo-surface::before {
+        content: '';
+        position: absolute;
+        top: -80px;
+        right: -80px;
+        width: 200px;
+        height: 200px;
+        border-radius: 50%;
+        pointer-events: none;
+        opacity: 0;
+        transition: opacity 0.5s;
+      }
+
+      .demo-surface:hover::before {
+        opacity: 1;
+      }
+
+      /* ------------------------------------------------
+         Style 1: Underline tabs (warm gold)
+      ------------------------------------------------ */
+      .style-underline tab-list {
+        gap: 0;
+        border-bottom: 1px solid var(--border);
+      }
+
+      .style-underline tab-button {
+        padding: 0.75rem 1.25rem;
+        font-family: var(--font-body);
+        font-size: 0.85rem;
+        font-weight: 400;
+        letter-spacing: 0.02em;
+        color: var(--text-dim);
         background: none;
         border: none;
         border-bottom: 2px solid transparent;
-        color: #555;
-        transition: color 0.15s, border-color 0.15s;
+        transition:
+          color 0.25s var(--ease-out),
+          border-color 0.25s var(--ease-out);
+        position: relative;
       }
 
-      tab-button:hover {
-        color: #111;
+      .style-underline tab-button:hover {
+        color: var(--text);
       }
 
-      tab-button[aria-selected="true"] {
-        color: #3366ff;
-        border-bottom-color: #3366ff;
+      .style-underline tab-button[aria-selected='true'] {
+        color: var(--accent);
+        border-bottom-color: var(--accent);
         font-weight: 500;
       }
 
-      tab-panel {
-        padding: 1rem 0.5rem;
+      .style-underline tab-panel {
+        padding: 1.5rem 0.25rem 0.5rem;
+        color: var(--text-dim);
+        font-size: 0.9rem;
+        line-height: 1.7;
+      }
+
+      .style-underline tab-panel h3 {
+        font-family: var(--font-display);
+        font-size: 1.3rem;
+        color: var(--text);
+        margin-bottom: 0.5rem;
+        font-weight: 400;
+      }
+
+      /* ------------------------------------------------
+         Style 2: Pill/capsule tabs (teal)
+      ------------------------------------------------ */
+      .style-pills tab-list {
+        gap: 0.4rem;
+        padding: 0.35rem;
+        background: var(--surface-raised);
+        border-radius: 10px;
+        border: 1px solid var(--border);
+        width: fit-content;
+      }
+
+      .style-pills tab-button {
+        padding: 0.55rem 1.15rem;
+        font-family: var(--font-body);
+        font-size: 0.82rem;
+        font-weight: 400;
+        color: var(--text-dim);
+        background: transparent;
+        border: none;
+        border-radius: 7px;
+        transition: all 0.25s var(--ease-out);
+      }
+
+      .style-pills tab-button:hover {
+        color: var(--text);
+        background: rgba(255, 255, 255, 0.04);
+      }
+
+      .style-pills tab-button[aria-selected='true'] {
+        color: #fff;
+        background: var(--teal);
+        font-weight: 500;
+        box-shadow: 0 1px 4px rgba(74, 158, 142, 0.3);
+      }
+
+      .style-pills tab-panel {
+        padding: 1.5rem 0.25rem 0.5rem;
+        color: var(--text-dim);
+        font-size: 0.9rem;
+        line-height: 1.7;
+      }
+
+      .style-pills tab-panel h3 {
+        font-family: var(--font-display);
+        font-size: 1.3rem;
+        color: var(--text);
+        margin-bottom: 0.5rem;
+        font-weight: 400;
+      }
+
+      /* ------------------------------------------------
+         Style 3: Floating/card tabs (coral)
+      ------------------------------------------------ */
+      .style-cards tab-list {
+        gap: 0.6rem;
+      }
+
+      .style-cards tab-button {
+        padding: 0.6rem 1.25rem;
+        font-family: var(--font-body);
+        font-size: 0.82rem;
+        font-weight: 400;
+        color: var(--text-dim);
+        background: transparent;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        transition: all 0.25s var(--ease-out);
+      }
+
+      .style-cards tab-button:hover {
+        color: var(--text);
+        border-color: #444;
+        background: rgba(255, 255, 255, 0.02);
+      }
+
+      .style-cards tab-button[aria-selected='true'] {
+        color: #fff;
+        background: var(--coral);
+        border-color: var(--coral);
+        font-weight: 500;
+        box-shadow: 0 2px 12px rgba(199, 93, 74, 0.25);
+      }
+
+      .style-cards tab-panel {
+        padding: 1.5rem 0.25rem 0.5rem;
+        color: var(--text-dim);
+        font-size: 0.9rem;
+        line-height: 1.7;
+      }
+
+      .style-cards tab-panel h3 {
+        font-family: var(--font-display);
+        font-size: 1.3rem;
+        color: var(--text);
+        margin-bottom: 0.5rem;
+        font-weight: 400;
+      }
+
+      /* ------------------------------------------------
+         Style 4: Minimal ghost tabs (lavender)
+      ------------------------------------------------ */
+      .style-ghost tab-list {
+        gap: 1.5rem;
+        padding-left: 0.25rem;
+      }
+
+      .style-ghost tab-button {
+        padding: 0.25rem 0;
+        font-family: var(--font-display);
+        font-size: 1.15rem;
+        font-weight: 400;
+        color: var(--text-dim);
+        background: none;
+        border: none;
+        position: relative;
+        transition: color 0.3s var(--ease-out);
+      }
+
+      .style-ghost tab-button::after {
+        content: '';
+        position: absolute;
+        bottom: -2px;
+        left: 0;
+        width: 0;
+        height: 1.5px;
+        background: var(--lavender);
+        transition: width 0.35s var(--ease-out);
+      }
+
+      .style-ghost tab-button:hover {
+        color: var(--text);
+      }
+
+      .style-ghost tab-button[aria-selected='true'] {
+        color: var(--lavender);
+      }
+
+      .style-ghost tab-button[aria-selected='true']::after {
+        width: 100%;
+      }
+
+      .style-ghost tab-panel {
+        padding: 1.5rem 0.25rem 0.5rem;
+        color: var(--text-dim);
+        font-size: 0.9rem;
+        line-height: 1.7;
+      }
+
+      .style-ghost tab-panel h3 {
+        font-family: var(--font-display);
+        font-size: 1.3rem;
+        color: var(--text);
+        margin-bottom: 0.5rem;
+        font-weight: 400;
+      }
+
+      /* ------------------------------------------------
+         Style 5: Nested tabs
+      ------------------------------------------------ */
+      .style-nested > tab-group > tab-list {
+        gap: 0;
+        border-bottom: 1px solid var(--border);
+      }
+
+      .style-nested > tab-group > tab-list > tab-button {
+        padding: 0.75rem 1.25rem;
+        font-family: var(--font-body);
+        font-size: 0.85rem;
+        font-weight: 400;
+        letter-spacing: 0.02em;
+        color: var(--text-dim);
+        background: none;
+        border: none;
+        border-bottom: 2px solid transparent;
+        transition:
+          color 0.25s var(--ease-out),
+          border-color 0.25s var(--ease-out);
+      }
+
+      .style-nested > tab-group > tab-list > tab-button:hover {
+        color: var(--text);
+      }
+
+      .style-nested > tab-group > tab-list > tab-button[aria-selected='true'] {
+        color: var(--accent);
+        border-bottom-color: var(--accent);
+        font-weight: 500;
+      }
+
+      .style-nested > tab-group > tab-panel {
+        padding: 1.5rem 0 0.5rem;
+        color: var(--text-dim);
+        font-size: 0.9rem;
+        line-height: 1.7;
+      }
+
+      .style-nested > tab-group > tab-panel h3 {
+        font-family: var(--font-display);
+        font-size: 1.3rem;
+        color: var(--text);
+        margin-bottom: 0.75rem;
+        font-weight: 400;
+      }
+
+      .style-nested > tab-group > tab-panel p {
+        margin-bottom: 1rem;
+      }
+
+      /* Inner nested tab-group */
+      .nested-inner {
+        margin-top: 1rem;
+        background: var(--surface-raised);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 1.25rem;
+      }
+
+      .nested-inner tab-list {
+        gap: 0.4rem;
+        padding: 0.3rem;
+        background: rgba(0, 0, 0, 0.25);
+        border-radius: 8px;
+        border: 1px solid rgba(255, 255, 255, 0.04);
+        width: fit-content;
+      }
+
+      .nested-inner tab-button {
+        padding: 0.45rem 0.95rem;
+        font-family: var(--font-body);
+        font-size: 0.78rem;
+        font-weight: 400;
+        color: var(--text-dim);
+        background: transparent;
+        border: none;
+        border-radius: 6px;
+        transition: all 0.25s var(--ease-out);
+      }
+
+      .nested-inner tab-button:hover {
+        color: var(--text);
+        background: rgba(255, 255, 255, 0.04);
+      }
+
+      .nested-inner tab-button[aria-selected='true'] {
+        color: #fff;
+        background: var(--teal);
+        font-weight: 500;
+        box-shadow: 0 1px 4px rgba(74, 158, 142, 0.3);
+      }
+
+      .nested-inner tab-panel {
+        padding: 1rem 0.25rem 0.25rem;
+        color: var(--text-dim);
+        font-size: 0.85rem;
+        line-height: 1.7;
+      }
+
+      .nested-inner tab-panel h4 {
+        font-family: var(--font-display);
+        font-size: 1.1rem;
+        color: var(--text);
+        margin-bottom: 0.4rem;
+        font-weight: 400;
+      }
+
+      /* ------------------------------------------------
+         Keyboard nav section
+      ------------------------------------------------ */
+      .keyboard-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-top: 1.5rem;
+      }
+
+      .key-item {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+      }
+
+      kbd {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 2rem;
+        height: 1.75rem;
+        padding: 0 0.5rem;
+        font-family: var(--font-mono);
+        font-size: 0.7rem;
+        font-weight: 400;
+        color: var(--text);
+        background: var(--surface-raised);
+        border: 1px solid var(--border);
+        border-bottom-width: 2px;
+        border-radius: 5px;
+        white-space: nowrap;
+      }
+
+      .key-desc {
+        font-size: 0.82rem;
+        color: var(--text-dim);
+      }
+
+      /* ------------------------------------------------
+         Code block
+      ------------------------------------------------ */
+      .code-block {
+        background: var(--surface-raised);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 1.25rem 1.5rem;
+        overflow-x: auto;
+        margin-top: 1.5rem;
+      }
+
+      .code-block code {
+        font-family: var(--font-mono);
+        font-size: 0.78rem;
+        font-weight: 300;
+        line-height: 1.8;
+        color: var(--text-dim);
+      }
+
+      .code-block .hl-selector {
+        color: var(--accent);
+      }
+
+      .code-block .hl-prop {
+        color: var(--teal);
+      }
+
+      .code-block .hl-value {
+        color: var(--coral);
+      }
+
+      .code-block .hl-attr {
+        color: var(--lavender);
+      }
+
+      /* ------------------------------------------------
+         Footer
+      ------------------------------------------------ */
+      footer {
+        margin-top: 2rem;
+        padding-top: 2rem;
+        border-top: 1px solid var(--border);
+        animation: fadeUp 0.8s var(--ease-out) 0.5s both;
+      }
+
+      footer p {
+        font-family: var(--font-mono);
+        font-size: 0.72rem;
+        color: var(--text-dim);
+        letter-spacing: 0.04em;
+      }
+
+      /* ------------------------------------------------
+         Animations
+      ------------------------------------------------ */
+      @keyframes fadeUp {
+        from {
+          opacity: 0;
+          transform: translateY(16px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      /* ------------------------------------------------
+         Responsive
+      ------------------------------------------------ */
+      @media (max-width: 600px) {
+        .page {
+          padding: 2.5rem 1.25rem 4rem;
+        }
+
+        .hero {
+          padding-bottom: 2.5rem;
+          margin-bottom: 2.5rem;
+        }
+
+        .example {
+          margin-bottom: 3.5rem;
+        }
+
+        .demo-surface {
+          padding: 1.25rem;
+        }
+
+        .keyboard-grid {
+          grid-template-columns: 1fr;
+        }
       }
     </style>
   </head>
   <body>
-    <header>
-      <h1>Tab Group Web Component</h1>
-      <p>
-        A fully accessible tab group component with keyboard navigation
-        and ARIA support. Ships only structural CSS — you bring your own styles.
-      </p>
-    </header>
-
-    <main>
-      <section id="basic-example">
-        <h2>Basic Example</h2>
-        <p>A simple tab group styled with plain CSS.</p>
-
-        <div class="demo-container">
-          <tab-group>
-            <tab-list>
-              <tab-button>First Tab</tab-button>
-              <tab-button>Second Tab</tab-button>
-              <tab-button>Third Tab</tab-button>
-            </tab-list>
-            <tab-panel>
-              <h3>First Tab Content</h3>
-              <p>This is the content for the first tab.</p>
-              <p>Tab panels can contain any HTML content.</p>
-            </tab-panel>
-            <tab-panel>
-              <h3>Second Tab Content</h3>
-              <p>This is the content for the second tab.</p>
-              <p>You can include images, lists, or other components here.</p>
-              <ul>
-                <li>Item 1</li>
-                <li>Item 2</li>
-                <li>Item 3</li>
-              </ul>
-            </tab-panel>
-            <tab-panel>
-              <h3>Third Tab Content</h3>
-              <p>This is the content for the third tab.</p>
-              <p>Each tab panel is only shown when its corresponding tab is active.</p>
-            </tab-panel>
-          </tab-group>
-        </div>
-      </section>
-
-      <section id="styling">
-        <h2>Styling</h2>
+    <div class="page">
+      <!-- Hero -->
+      <header class="hero">
+        <div class="hero-badge">@magic-spells/tab-group</div>
+        <h1>Tabs that get out<br />of <em>your</em> way</h1>
         <p>
-          The component ships zero cosmetic styles. Target the custom elements
-          and ARIA attributes directly:
+          A fully accessible tab group web component with keyboard
+          navigation and ARIA support. Ships only structural CSS
+          &mdash; all visual styles are yours to define.
         </p>
-        <pre><code>tab-list {
-  gap: 0.25rem;
-  border-bottom: 1px solid #ddd;
+      </header>
+
+      <main>
+        <!-- Style 1: Underline -->
+        <section class="example">
+          <div class="example-label">Style 01</div>
+          <h2>Underline</h2>
+          <p>
+            The classic approach. A quiet border-bottom reveals the
+            active tab while everything else recedes.
+          </p>
+
+          <div class="demo-surface style-underline">
+            <tab-group>
+              <tab-list>
+                <tab-button>Overview</tab-button>
+                <tab-button>Features</tab-button>
+                <tab-button>Installation</tab-button>
+              </tab-list>
+              <tab-panel>
+                <h3>Overview</h3>
+                <p>
+                  A zero-dependency web component that registers four
+                  custom elements: <code>&lt;tab-group&gt;</code>,
+                  <code>&lt;tab-list&gt;</code>,
+                  <code>&lt;tab-button&gt;</code>, and
+                  <code>&lt;tab-panel&gt;</code>. Drop them into any
+                  page and style however you like.
+                </p>
+              </tab-panel>
+              <tab-panel>
+                <h3>Features</h3>
+                <p>
+                  Full ARIA roles and attributes out of the box.
+                  Keyboard navigation with arrow keys, Home, and End.
+                  A
+                  <code>tabchange</code> custom event fires whenever
+                  the active tab changes. No Shadow DOM &mdash; style
+                  the elements directly.
+                </p>
+              </tab-panel>
+              <tab-panel>
+                <h3>Installation</h3>
+                <p>
+                  Install via npm with
+                  <code>npm i @magic-spells/tab-group</code>, then
+                  import the module. Custom elements register
+                  automatically. Include the structural CSS or import
+                  it from the package.
+                </p>
+              </tab-panel>
+            </tab-group>
+          </div>
+        </section>
+
+        <!-- Style 2: Pills -->
+        <section class="example">
+          <div class="example-label">Style 02</div>
+          <h2>Capsule</h2>
+          <p>
+            Pill-shaped tabs nestled inside a recessed track. Feels
+            tactile, works beautifully in toolbars and settings
+            panels.
+          </p>
+
+          <div class="demo-surface style-pills">
+            <tab-group>
+              <tab-list>
+                <tab-button>Design</tab-button>
+                <tab-button>Develop</tab-button>
+                <tab-button>Deploy</tab-button>
+              </tab-list>
+              <tab-panel>
+                <h3>Design</h3>
+                <p>
+                  Start with the markup. The component is unstyled by
+                  design, so your creative direction stays intact.
+                  Target custom elements and ARIA attributes with
+                  plain CSS.
+                </p>
+              </tab-panel>
+              <tab-panel>
+                <h3>Develop</h3>
+                <p>
+                  Import the ES module or drop in the UMD build. Works
+                  with every framework &mdash; or no framework at all.
+                  TypeScript definitions are included if you need
+                  them.
+                </p>
+              </tab-panel>
+              <tab-panel>
+                <h3>Deploy</h3>
+                <p>
+                  Under 2 KB gzipped with zero dependencies. No build
+                  step required for basic usage. Tree-shaking friendly
+                  for bundled projects.
+                </p>
+              </tab-panel>
+            </tab-group>
+          </div>
+        </section>
+
+        <!-- Style 3: Cards -->
+        <section class="example">
+          <div class="example-label">Style 03</div>
+          <h2>Outlined</h2>
+          <p>
+            Bordered buttons that fill with color on selection. Bold
+            enough to anchor a hero section or feature comparison.
+          </p>
+
+          <div class="demo-surface style-cards">
+            <tab-group>
+              <tab-list>
+                <tab-button>Starter</tab-button>
+                <tab-button>Pro</tab-button>
+                <tab-button>Enterprise</tab-button>
+              </tab-list>
+              <tab-panel>
+                <h3>Starter</h3>
+                <p>
+                  Perfect for personal projects and prototypes. Drop
+                  the script tag into your HTML, add the markup, and
+                  style with a few lines of CSS. That's it.
+                </p>
+              </tab-panel>
+              <tab-panel>
+                <h3>Pro</h3>
+                <p>
+                  For production apps that need polish. Listen to
+                  <code>tabchange</code> events to sync state,
+                  lazy-load panel content, or trigger animations when
+                  tabs switch.
+                </p>
+              </tab-panel>
+              <tab-panel>
+                <h3>Enterprise</h3>
+                <p>
+                  Meets WCAG 2.1 AA out of the box. The component
+                  handles focus management, ARIA labeling, and
+                  keyboard navigation so your team doesn't have to.
+                </p>
+              </tab-panel>
+            </tab-group>
+          </div>
+        </section>
+
+        <!-- Style 4: Ghost -->
+        <section class="example">
+          <div class="example-label">Style 04</div>
+          <h2>Ghost</h2>
+          <p>
+            Stripped to the essentials. Serif typography and an
+            animated underline &mdash; nothing more.
+          </p>
+
+          <div class="demo-surface style-ghost">
+            <tab-group>
+              <tab-list>
+                <tab-button>Markup</tab-button>
+                <tab-button>Styling</tab-button>
+                <tab-button>Events</tab-button>
+              </tab-list>
+              <tab-panel>
+                <h3>Markup</h3>
+                <p>
+                  Nest <code>&lt;tab-button&gt;</code> elements inside
+                  a <code>&lt;tab-list&gt;</code>, and place
+                  <code>&lt;tab-panel&gt;</code> elements after it.
+                  The component pairs them by position automatically.
+                </p>
+              </tab-panel>
+              <tab-panel>
+                <h3>Styling</h3>
+                <p>
+                  Target
+                  <code>tab-button[aria-selected="true"]</code> for
+                  the active state. Use <code>tab-panel</code> for
+                  content areas. Every element is a real DOM node
+                  &mdash; no shadow boundaries to pierce.
+                </p>
+              </tab-panel>
+              <tab-panel>
+                <h3>Events</h3>
+                <p>
+                  The <code>tabchange</code> event bubbles and carries
+                  a detail object with <code>previousIndex</code>,
+                  <code>currentIndex</code>, and references to both
+                  the tab and panel elements.
+                </p>
+              </tab-panel>
+            </tab-group>
+          </div>
+        </section>
+
+        <!-- Style 5: Nested -->
+        <section class="example">
+          <div class="example-label">Style 05</div>
+          <h2>Nested</h2>
+          <p>
+            Tab groups inside tab groups. Each instance manages its own
+            state independently &mdash; no conflicts, no extra config.
+          </p>
+
+          <div class="demo-surface style-nested">
+            <tab-group>
+              <tab-list>
+                <tab-button>Components</tab-button>
+                <tab-button>Utilities</tab-button>
+                <tab-button>Guides</tab-button>
+              </tab-list>
+              <tab-panel>
+                <h3>Components</h3>
+                <p>
+                  Each component ships as an independent web component.
+                  Pick the one below to explore its API.
+                </p>
+                <div class="nested-inner">
+                  <tab-group>
+                    <tab-list>
+                      <tab-button>Tab Group</tab-button>
+                      <tab-button>Tab List</tab-button>
+                      <tab-button>Tab Button</tab-button>
+                      <tab-button>Tab Panel</tab-button>
+                    </tab-list>
+                    <tab-panel>
+                      <h4>Tab Group</h4>
+                      <p>
+                        The root container. Coordinates tabs and panels,
+                        assigns ARIA roles, and dispatches
+                        <code>tabchange</code> events. Ensures tab/panel
+                        count stays in sync automatically.
+                      </p>
+                    </tab-panel>
+                    <tab-panel>
+                      <h4>Tab List</h4>
+                      <p>
+                        Wraps <code>&lt;tab-button&gt;</code> elements and
+                        receives <code>role="tablist"</code>. Handles
+                        keyboard event delegation for arrow-key navigation
+                        between tabs.
+                      </p>
+                    </tab-panel>
+                    <tab-panel>
+                      <h4>Tab Button</h4>
+                      <p>
+                        Each button receives <code>role="tab"</code>,
+                        a unique ID, and <code>aria-controls</code>
+                        pointing to its panel. Only the active tab has
+                        <code>tabindex="0"</code>.
+                      </p>
+                    </tab-panel>
+                    <tab-panel>
+                      <h4>Tab Panel</h4>
+                      <p>
+                        Content containers with
+                        <code>role="tabpanel"</code> and
+                        <code>aria-labelledby</code> linking back to their
+                        tab. Inactive panels receive the
+                        <code>hidden</code> attribute.
+                      </p>
+                    </tab-panel>
+                  </tab-group>
+                </div>
+              </tab-panel>
+              <tab-panel>
+                <h3>Utilities</h3>
+                <p>
+                  Helper patterns for common scenarios when working with
+                  the tab component.
+                </p>
+                <div class="nested-inner">
+                  <tab-group>
+                    <tab-list>
+                      <tab-button>Lazy Loading</tab-button>
+                      <tab-button>Deep Linking</tab-button>
+                      <tab-button>Animations</tab-button>
+                    </tab-list>
+                    <tab-panel>
+                      <h4>Lazy Loading</h4>
+                      <p>
+                        Listen for <code>tabchange</code> and fetch panel
+                        content on demand. The event's
+                        <code>detail.currentPanel</code> gives you a
+                        direct reference to populate.
+                      </p>
+                    </tab-panel>
+                    <tab-panel>
+                      <h4>Deep Linking</h4>
+                      <p>
+                        Read the URL hash on page load and call
+                        <code>setActiveTab(index)</code> to restore the
+                        user's position. Update the hash inside your
+                        <code>tabchange</code> handler.
+                      </p>
+                    </tab-panel>
+                    <tab-panel>
+                      <h4>Animations</h4>
+                      <p>
+                        Add CSS transitions to <code>tab-panel</code> for
+                        fade or slide effects. Since panels use the
+                        <code>hidden</code> attribute, toggle a class
+                        instead for animated transitions.
+                      </p>
+                    </tab-panel>
+                  </tab-group>
+                </div>
+              </tab-panel>
+              <tab-panel>
+                <h3>Guides</h3>
+                <p>
+                  Step-by-step walkthroughs for integrating the tab
+                  component into your project.
+                </p>
+                <div class="nested-inner">
+                  <tab-group>
+                    <tab-list>
+                      <tab-button>Vanilla JS</tab-button>
+                      <tab-button>React</tab-button>
+                      <tab-button>Vue</tab-button>
+                    </tab-list>
+                    <tab-panel>
+                      <h4>Vanilla JS</h4>
+                      <p>
+                        Import the module with a
+                        <code>&lt;script type="module"&gt;</code> tag.
+                        The custom elements register automatically
+                        &mdash; just write the HTML and add your styles.
+                      </p>
+                    </tab-panel>
+                    <tab-panel>
+                      <h4>React</h4>
+                      <p>
+                        Import the package in your entry point. Use the
+                        custom element names directly in JSX. React 19+
+                        handles custom element properties natively.
+                      </p>
+                    </tab-panel>
+                    <tab-panel>
+                      <h4>Vue</h4>
+                      <p>
+                        Register the import in your main file and add the
+                        tag names to
+                        <code>compilerOptions.isCustomElement</code> in
+                        your Vue config so the compiler skips them.
+                      </p>
+                    </tab-panel>
+                  </tab-group>
+                </div>
+              </tab-panel>
+            </tab-group>
+          </div>
+        </section>
+
+        <!-- Keyboard navigation -->
+        <section class="example">
+          <div class="example-label">Accessibility</div>
+          <h2>Keyboard Navigation</h2>
+          <p>
+            Full keyboard support is built in. Focus a tab and use
+            these keys to navigate.
+          </p>
+
+          <div class="keyboard-grid">
+            <div class="key-item">
+              <kbd>Tab</kbd>
+              <span class="key-desc">Focus active tab</span>
+            </div>
+            <div class="key-item">
+              <div><kbd>&larr;</kbd> <kbd>&uarr;</kbd></div>
+              <span class="key-desc">Previous tab</span>
+            </div>
+            <div class="key-item">
+              <div><kbd>&rarr;</kbd> <kbd>&darr;</kbd></div>
+              <span class="key-desc">Next tab</span>
+            </div>
+            <div class="key-item">
+              <kbd>Home</kbd>
+              <span class="key-desc">First tab</span>
+            </div>
+            <div class="key-item">
+              <kbd>End</kbd>
+              <span class="key-desc">Last tab</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- Code example -->
+        <section class="example">
+          <div class="example-label">Quick Start</div>
+          <h2>Bring Your Own Styles</h2>
+          <p>
+            The component ships zero cosmetic CSS. Here's all you need
+            to build a complete tab interface.
+          </p>
+
+          <div class="code-block">
+            <code>
+              <pre><span class="hl-selector">tab-list</span> {
+  <span class="hl-prop">gap</span>: <span class="hl-value">0.25rem</span>;
+  <span class="hl-prop">border-bottom</span>: <span class="hl-value">1px solid #ddd</span>;
 }
 
-tab-button {
-  padding: 0.5rem 1rem;
-  border-bottom: 2px solid transparent;
+<span class="hl-selector">tab-button</span> {
+  <span class="hl-prop">padding</span>: <span class="hl-value">0.5rem 1rem</span>;
+  <span class="hl-prop">border-bottom</span>: <span class="hl-value">2px solid transparent</span>;
 }
 
-tab-button[aria-selected="true"] {
-  color: #3366ff;
-  border-bottom-color: #3366ff;
+<span class="hl-selector">tab-button</span><span class="hl-attr">[aria-selected="true"]</span> {
+  <span class="hl-prop">color</span>: <span class="hl-value">#3366ff</span>;
+  <span class="hl-prop">border-bottom-color</span>: <span class="hl-value">#3366ff</span>;
 }
 
-tab-panel {
-  padding: 1rem;
-}</code></pre>
-        <p>Or use Tailwind utility classes — no overrides needed.</p>
-      </section>
+<span class="hl-selector">tab-panel</span> {
+  <span class="hl-prop">padding</span>: <span class="hl-value">1rem</span>;
+}</pre>
+            </code>
+          </div>
+        </section>
+      </main>
 
-      <section id="keyboard-navigation">
-        <h2>Keyboard Navigation</h2>
-        <p>
-          The tab group component supports complete keyboard navigation
-          for accessibility.
-        </p>
-
-        <div class="instructions">
-          <h3>Keyboard Controls</h3>
-          <ul>
-            <li>
-              <span class="key">Tab</span> to focus the active tab
-            </li>
-            <li>
-              <span class="key">←</span>
-              <span class="key">↑</span> to move to the previous tab
-            </li>
-            <li>
-              <span class="key">→</span>
-              <span class="key">↓</span> to move to the next tab
-            </li>
-            <li>
-              <span class="key">Home</span> to move to the first tab
-            </li>
-            <li>
-              <span class="key">End</span> to move to the last tab
-            </li>
-          </ul>
-        </div>
-
-        <div class="demo-container">
-          <tab-group>
-            <tab-list>
-              <tab-button>Documentation</tab-button>
-              <tab-button>Examples</tab-button>
-              <tab-button>API</tab-button>
-              <tab-button>Support</tab-button>
-            </tab-list>
-            <tab-panel>
-              <h3>Documentation</h3>
-              <p>Comprehensive documentation about how to use the tab group component.</p>
-              <p>Try using the keyboard to navigate between tabs.</p>
-            </tab-panel>
-            <tab-panel>
-              <h3>Examples</h3>
-              <p>Various examples and use cases for the tab group component.</p>
-              <p>These examples showcase different configurations.</p>
-            </tab-panel>
-            <tab-panel>
-              <h3>API</h3>
-              <p>Technical API documentation for developers.</p>
-              <p>Includes methods, properties, and events available on the component.</p>
-            </tab-panel>
-            <tab-panel>
-              <h3>Support</h3>
-              <p>Get help and support for using the tab group component.</p>
-              <p>Contact information and resources for troubleshooting.</p>
-            </tab-panel>
-          </tab-group>
-        </div>
-      </section>
-    </main>
-
-    <footer>
-      <p>&copy; 2025 Magic Spells. Released under the MIT License.</p>
-    </footer>
+      <footer>
+        <p>&copy; 2026 Magic Spells &middot; MIT License</p>
+      </footer>
+    </div>
 
     <script>
-      // Listen for tabchange events
       document.addEventListener('DOMContentLoaded', function () {
-        document.querySelectorAll('tab-group').forEach(tabGroup => {
-          tabGroup.addEventListener('tabchange', function(event) {
+        document.querySelectorAll('tab-group').forEach((tabGroup) => {
+          tabGroup.addEventListener('tabchange', function (event) {
             console.log('Tab changed:', event.detail);
           });
         });

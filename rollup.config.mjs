@@ -7,16 +7,15 @@ import postcss from 'rollup-plugin-postcss';
 const dev = process.env.ROLLUP_WATCH;
 const name = 'tab-group';
 
-// Shared CSS plugin config
-const cssPlugin = postcss({
+// CSS plugin factories — each build entry needs its own instance
+const cssPlugin = () => postcss({
   extract: `${name}.css`,
   minimize: false,
   sourceMap: dev,
   extensions: ['.css'],
 });
 
-// Shared CSS plugin config (minimized version)
-const cssMinPlugin = postcss({
+const cssMinPlugin = () => postcss({
   extract: `${name}.min.css`,
   minimize: true,
   sourceMap: dev,
@@ -34,7 +33,7 @@ export default [
     },
     plugins: [
       resolve(),
-      cssPlugin,
+      cssPlugin(),
     ],
   },
   // CommonJS build
@@ -46,7 +45,7 @@ export default [
       sourcemap: true,
       exports: 'named',
     },
-    plugins: [resolve(), cssPlugin],
+    plugins: [resolve(), cssPlugin()],
   },
   // UMD build
   {
@@ -58,7 +57,7 @@ export default [
       sourcemap: true,
       exports: 'named',
     },
-    plugins: [resolve(), cssPlugin],
+    plugins: [resolve(), cssPlugin()],
   },
   // Minified UMD for browsers
   {
@@ -72,7 +71,7 @@ export default [
     },
     plugins: [
       resolve(),
-      cssMinPlugin,
+      cssMinPlugin(),
       terser({
         keep_classnames: true,
         format: {
@@ -87,13 +86,13 @@ export default [
         {
           input: 'src/tab-group.js',
           output: {
-            file: `dist/${name}.esm.js`,
+            file: `dist/${name}.dev.js`,
             format: 'es',
             sourcemap: true,
           },
           plugins: [
             resolve(),
-            cssMinPlugin,
+            cssMinPlugin(),
             serve({
               contentBase: ['dist', 'demo'],
               open: true,
@@ -102,12 +101,14 @@ export default [
             copy({
               targets: [
                 {
-                  src: `dist/${name}.esm.js`,
+                  src: `dist/${name}.dev.js`,
                   dest: 'demo',
+                  rename: `${name}.esm.js`,
                 },
                 {
-                  src: `dist/${name}.esm.js.map`,
+                  src: `dist/${name}.dev.js.map`,
                   dest: 'demo',
+                  rename: `${name}.esm.js.map`,
                 },
                 {
                   src: `dist/${name}.min.css`,
