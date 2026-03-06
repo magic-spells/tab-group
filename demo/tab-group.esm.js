@@ -259,4 +259,4 @@ if (typeof window !== 'undefined' && window.customElements) {
 }
 
 export { TabGroup as default };
-//# sourceMappingURL=tab-group.dev.js.map
+//# sourceMappingURL=tab-group.esm.js.map

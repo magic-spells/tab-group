@@ -34,6 +34,28 @@ export default [
     plugins: [
       resolve(),
       cssPlugin(),
+      ...(dev
+        ? [
+            serve({
+              contentBase: ['dist', 'demo'],
+              open: true,
+              port: 3000,
+            }),
+            copy({
+              targets: [
+                {
+                  src: `dist/${name}.esm.js`,
+                  dest: 'demo',
+                },
+                {
+                  src: `dist/${name}.esm.js.map`,
+                  dest: 'demo',
+                },
+              ],
+              hook: 'writeBundle',
+            }),
+          ]
+        : []),
     ],
   },
   // CommonJS build
@@ -78,38 +100,10 @@ export default [
           comments: false,
         },
       }),
-    ],
-  },
-  // Development build
-  ...(dev
-    ? [
-        {
-          input: 'src/tab-group.js',
-          output: {
-            file: `dist/${name}.dev.js`,
-            format: 'es',
-            sourcemap: true,
-          },
-          plugins: [
-            resolve(),
-            cssMinPlugin(),
-            serve({
-              contentBase: ['dist', 'demo'],
-              open: true,
-              port: 3000,
-            }),
+      ...(dev
+        ? [
             copy({
               targets: [
-                {
-                  src: `dist/${name}.dev.js`,
-                  dest: 'demo',
-                  rename: `${name}.esm.js`,
-                },
-                {
-                  src: `dist/${name}.dev.js.map`,
-                  dest: 'demo',
-                  rename: `${name}.esm.js.map`,
-                },
                 {
                   src: `dist/${name}.min.css`,
                   dest: 'demo',
@@ -117,8 +111,8 @@ export default [
               ],
               hook: 'writeBundle',
             }),
-          ],
-        },
-      ]
-    : []),
+          ]
+        : []),
+    ],
+  },
 ];
