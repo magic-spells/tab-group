@@ -1,7 +1,7 @@
 # Tab Group
 
 ![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)
-![Version](https://img.shields.io/badge/version-0.1.0-brightgreen)
+![Version](https://img.shields.io/badge/version-1.0.0-brightgreen)
 
 A lightweight, accessible tab interface web component with keyboard navigation. Ships only structural CSS — you bring your own styles.
 
