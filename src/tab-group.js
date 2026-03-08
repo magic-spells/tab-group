@@ -123,9 +123,81 @@ export default class TabGroup extends HTMLElement {
 	 * called when the element is disconnected from the dom
 	 */
 	disconnectedCallback() {
+		if (this._animationController) {
+			this._animationController.abort();
+			this._animationController = null;
+		}
 		if (this.tabList && this._onKeyDown) {
 			this.tabList.removeEventListener('keydown', this._onKeyDown);
 			this.tabList.removeEventListener('click', this._onClick);
+		}
+	}
+
+	/**
+	 * reads animation attributes from the element
+	 */
+	_getAnimateConfig() {
+		const outClass = this.getAttribute('animate-out-class');
+		const inClass = this.getAttribute('animate-in-class');
+		const timeout = parseInt(this.getAttribute('animate-timeout'), 10) || 500;
+		return { outClass, inClass, timeout, hasAnimation: !!(outClass || inClass) };
+	}
+
+	/**
+	 * adds a class and waits for animationend (or timeout), with abort support
+	 */
+	_waitForAnimation(element, className, timeout, signal) {
+		return new Promise((resolve) => {
+			if (signal.aborted) {
+				resolve();
+				return;
+			}
+
+			element.classList.add(className);
+
+			let timer;
+			const cleanup = () => {
+				element.classList.remove(className);
+				clearTimeout(timer);
+				element.removeEventListener('animationend', onEnd);
+				signal.removeEventListener('abort', onAbort);
+				resolve();
+			};
+
+			const onEnd = (e) => {
+				if (e.target === element) cleanup();
+			};
+
+			const onAbort = () => cleanup();
+
+			element.addEventListener('animationend', onEnd);
+			signal.addEventListener('abort', onAbort);
+			timer = setTimeout(cleanup, timeout);
+		});
+	}
+
+	/**
+	 * orchestrates out-animation → swap → in-animation
+	 */
+	async _animateTransition(oldPanel, newPanel, config, controller) {
+		const { signal } = controller;
+
+		// Phase 1: animate out
+		if (config.outClass && oldPanel) {
+			await this._waitForAnimation(oldPanel, config.outClass, config.timeout, signal);
+		}
+		if (signal.aborted) return;
+
+		// Phase 2: swap hidden
+		if (oldPanel) oldPanel.hidden = true;
+		newPanel.hidden = false;
+
+		// Phase 3: animate in
+		if (config.inClass) {
+			if (signal.aborted) return;
+			// force reflow so the browser sees the element before animating
+			newPanel.offsetHeight;
+			await this._waitForAnimation(newPanel, config.inClass, config.timeout, signal);
 		}
 	}
 
@@ -140,7 +212,17 @@ export default class TabGroup extends HTMLElement {
 			(tab) => tab.getAttribute('aria-selected') === 'true'
 		);
 
-		// update each tab-button
+		// cancel any in-flight animation
+		if (this._animationController) {
+			this._animationController.abort();
+			this._animationController = null;
+			// force-hide all panels (clean slate)
+			this.tabPanels.forEach((panel) => {
+				panel.hidden = true;
+			});
+		}
+
+		// update each tab-button (ARIA updates fire immediately)
 		this.tabButtons.forEach((tab, i) => {
 			const isActive = i === index;
 			tab.setAttribute('aria-selected', isActive ? 'true' : 'false');
@@ -148,11 +230,6 @@ export default class TabGroup extends HTMLElement {
 			if (isActive) {
 				tab.focus();
 			}
-		});
-
-		// update each tab-panel
-		this.tabPanels.forEach((panel, i) => {
-			panel.hidden = i !== index;
 		});
 
 		// dispatch event only if the tab actually changed
@@ -168,6 +245,48 @@ export default class TabGroup extends HTMLElement {
 			this.dispatchEvent(
 				new CustomEvent('tabchange', { detail, bubbles: true })
 			);
+		}
+
+		const config = this._getAnimateConfig();
+		const oldPanel = previousIndex >= 0 ? this.tabPanels[previousIndex] : null;
+		const newPanel = this.tabPanels[index];
+
+		if (!config.hasAnimation || previousIndex === index) {
+			// instant switch (original behavior)
+			this.tabPanels.forEach((panel, i) => {
+				panel.hidden = i !== index;
+			});
+			return;
+		}
+
+		// animated transition
+		const controller = new AbortController();
+		this._animationController = controller;
+
+		// old panel was already force-hidden by abort above, so if we aborted
+		// a previous animation, skip animate-out (old panel is already gone)
+		const skipOut = oldPanel && oldPanel.hidden;
+
+		if (skipOut) {
+			// just animate in the new panel
+			newPanel.hidden = false;
+			if (config.inClass) {
+				newPanel.offsetHeight;
+				this._waitForAnimation(newPanel, config.inClass, config.timeout, controller.signal).then(() => {
+					if (this._animationController === controller) {
+						this._animationController = null;
+					}
+				});
+			} else {
+				this._animationController = null;
+			}
+		} else {
+			// full out → swap → in sequence
+			this._animateTransition(oldPanel, newPanel, config, controller).then(() => {
+				if (this._animationController === controller) {
+					this._animationController = null;
+				}
+			});
 		}
 	}
 

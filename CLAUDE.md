@@ -8,7 +8,7 @@ Accessible tab group web component. Four custom elements: `<tab-group>`, `<tab-l
 - `src/tab-group.css` — Structural CSS only (19 lines, no cosmetic styles)
 - `rollup.config.mjs` — Builds ESM, CJS, UMD, and minified UMD to `dist/`
 - `demo/` — Static demo page for GitHub Pages (uses built files copied from dist)
-- `dist/tab-group.d.ts` — TypeScript definitions
+- `tab-group.d.ts` — TypeScript definitions (root-level, published alongside dist)
 
 ## Build
 
@@ -25,6 +25,10 @@ Accessible tab group web component. Four custom elements: `<tab-group>`, `<tab-l
 - `sideEffects: true` — component self-registers custom elements on import
 - Module-level `instanceCount` for unique ARIA IDs across instances
 - `files: ["dist/"]` in package.json — only dist is published
+- CSS animation support via `animate-out-class`, `animate-in-class`, `animate-timeout` attributes
+- Animation lifecycle: ARIA updates immediately, then animate-out → swap hidden → animate-in
+- AbortController-based cancellation handles rapid clicks cleanly
+- No animation attributes = original instant behavior (fully backwards-compatible)
 
 ## Publishing
 

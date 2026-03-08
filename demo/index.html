@@ -147,6 +147,12 @@
       .example:nth-child(5) {
         animation-delay: 0.4s;
       }
+      .example:nth-child(6) {
+        animation-delay: 0.5s;
+      }
+      .example:nth-child(7) {
+        animation-delay: 0.6s;
+      }
 
       .example-label {
         font-family: var(--font-mono);
@@ -515,6 +521,198 @@
       }
 
       /* ------------------------------------------------
+         Style 6: Animated tabs
+      ------------------------------------------------ */
+      @keyframes tab-fade-out {
+        from {
+          opacity: 1;
+          transform: translateY(0);
+        }
+        to {
+          opacity: 0;
+          transform: translateY(6px);
+        }
+      }
+
+      @keyframes tab-fade-in {
+        from {
+          opacity: 0;
+          transform: translateY(-6px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .style-animated tab-list {
+        gap: 0;
+        border-bottom: 1px solid var(--border);
+      }
+
+      .style-animated tab-button {
+        padding: 0.75rem 1.25rem;
+        font-family: var(--font-body);
+        font-size: 0.85rem;
+        font-weight: 400;
+        letter-spacing: 0.02em;
+        color: var(--text-dim);
+        background: none;
+        border: none;
+        border-bottom: 2px solid transparent;
+        transition:
+          color 0.25s var(--ease-out),
+          border-color 0.25s var(--ease-out);
+      }
+
+      .style-animated tab-button:hover {
+        color: var(--text);
+      }
+
+      .style-animated tab-button[aria-selected='true'] {
+        color: var(--teal);
+        border-bottom-color: var(--teal);
+        font-weight: 500;
+      }
+
+      .style-animated tab-panel {
+        padding: 1.5rem 0.25rem 0.5rem;
+        color: var(--text-dim);
+        font-size: 0.9rem;
+        line-height: 1.7;
+      }
+
+      .style-animated tab-panel h3 {
+        font-family: var(--font-display);
+        font-size: 1.3rem;
+        color: var(--text);
+        margin-bottom: 0.5rem;
+        font-weight: 400;
+      }
+
+      .style-animated tab-panel.fade-out {
+        animation: tab-fade-out 0.25s var(--ease-out) forwards;
+      }
+
+      .style-animated tab-panel.fade-in {
+        animation: tab-fade-in 0.25s var(--ease-out) forwards;
+      }
+
+      /* ------------------------------------------------
+         Style 7: Staggered list animation
+      ------------------------------------------------ */
+      @keyframes stagger-item-out {
+        from {
+          opacity: 1;
+          transform: translateY(0);
+        }
+        to {
+          opacity: 0;
+          transform: translateY(10px);
+        }
+      }
+
+      @keyframes stagger-item-in {
+        from {
+          opacity: 0;
+          transform: translateY(-10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .style-stagger tab-list {
+        gap: 0.4rem;
+        padding: 0.35rem;
+        background: var(--surface-raised);
+        border-radius: 10px;
+        border: 1px solid var(--border);
+        width: fit-content;
+        margin-bottom: 1rem;
+      }
+
+      .style-stagger tab-button {
+        padding: 0.55rem 1.15rem;
+        font-family: var(--font-body);
+        font-size: 0.82rem;
+        font-weight: 400;
+        color: var(--text-dim);
+        background: transparent;
+        border: none;
+        border-radius: 7px;
+        transition: all 0.25s var(--ease-out);
+      }
+
+      .style-stagger tab-button:hover {
+        color: var(--text);
+        background: rgba(255, 255, 255, 0.04);
+      }
+
+      .style-stagger tab-button[aria-selected='true'] {
+        color: #fff;
+        background: var(--lavender);
+        font-weight: 500;
+        box-shadow: 0 1px 4px rgba(139, 126, 200, 0.3);
+      }
+
+      .style-stagger tab-panel {
+        padding: 1.5rem 0 0.5rem;
+      }
+
+      .style-stagger .stagger-item {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 0.85rem 1rem;
+        border-radius: 8px;
+        border: 1px solid var(--border);
+        background: var(--surface-raised);
+        margin-bottom: 0.5rem;
+      }
+
+      .style-stagger .stagger-item:last-child {
+        margin-bottom: 0;
+      }
+
+      .style-stagger .item-num {
+        font-family: var(--font-mono);
+        font-size: 0.7rem;
+        font-weight: 400;
+        color: var(--lavender);
+        min-width: 1.5rem;
+      }
+
+      .style-stagger .item-text {
+        font-family: var(--font-body);
+        font-size: 0.85rem;
+        font-weight: 400;
+        color: var(--text-dim);
+      }
+
+      .style-stagger .item-text strong {
+        color: var(--text);
+        font-weight: 500;
+        display: block;
+        margin-bottom: 0.1rem;
+      }
+
+      .style-stagger .item-text span {
+        font-size: 0.78rem;
+      }
+
+      .style-stagger tab-panel.stagger-out .stagger-item {
+        animation: stagger-item-out 0.2s var(--ease-out) forwards;
+        animation-delay: calc(var(--i) * 50ms);
+      }
+
+      .style-stagger tab-panel.stagger-in .stagger-item {
+        animation: stagger-item-in 0.2s var(--ease-out) both;
+        animation-delay: calc(var(--i) * 50ms);
+      }
+
+      /* ------------------------------------------------
          Keyboard nav section
       ------------------------------------------------ */
       .keyboard-grid {
@@ -853,9 +1051,149 @@
           </div>
         </section>
 
-        <!-- Style 5: Nested -->
+        <!-- Style 5: Animated -->
         <section class="example">
           <div class="example-label">Style 05</div>
+          <h2>Animated</h2>
+          <p>
+            CSS animation classes orchestrated by the component. The old panel
+            fades out, then the new one fades in. Try clicking rapidly.
+          </p>
+
+          <div class="demo-surface style-animated">
+            <tab-group
+              animate-out-class="fade-out"
+              animate-in-class="fade-in"
+              animate-timeout="500">
+              <tab-list>
+                <tab-button>Transition</tab-button>
+                <tab-button>Lifecycle</tab-button>
+                <tab-button>Fallbacks</tab-button>
+              </tab-list>
+              <tab-panel>
+                <h3>Transition</h3>
+                <p>
+                  Set <code>animate-out-class</code> and
+                  <code>animate-in-class</code> attributes on the
+                  <code>&lt;tab-group&gt;</code> element. The component adds
+                  these classes at the right time and waits for
+                  <code>animationend</code> before proceeding.
+                </p>
+              </tab-panel>
+              <tab-panel>
+                <h3>Lifecycle</h3>
+                <p>
+                  ARIA updates and the <code>tabchange</code> event fire
+                  immediately. Then the out-class animates the old panel,
+                  hidden is swapped, and the in-class animates the new panel.
+                  Each attribute works independently.
+                </p>
+              </tab-panel>
+              <tab-panel>
+                <h3>Fallbacks</h3>
+                <p>
+                  If <code>animationend</code> never fires (e.g., no matching
+                  <code>@keyframes</code>), the <code>animate-timeout</code>
+                  attribute controls a fallback timer. Defaults to 500ms.
+                  Rapid clicks cancel cleanly and skip to the target tab.
+                </p>
+              </tab-panel>
+            </tab-group>
+          </div>
+        </section>
+
+        <!-- Style 6: Staggered -->
+        <section class="example">
+          <div class="example-label">Style 06</div>
+          <h2>Staggered</h2>
+          <p>
+            List items animate out one by one with a 50ms delay between each,
+            then cascade back in. Rapid clicks cancel cleanly.
+          </p>
+
+          <div class="demo-surface style-stagger">
+            <tab-group
+              animate-out-class="stagger-out"
+              animate-in-class="stagger-in"
+              animate-timeout="500">
+              <tab-list>
+                <tab-button>Features</tab-button>
+                <tab-button>Stack</tab-button>
+                <tab-button>Principles</tab-button>
+              </tab-list>
+              <tab-panel>
+                <div class="stagger-item" style="--i: 0">
+                  <span class="item-num">01</span>
+                  <span class="item-text"><strong>ARIA Roles</strong><span>Automatic role, tabindex, and aria-controls</span></span>
+                </div>
+                <div class="stagger-item" style="--i: 1">
+                  <span class="item-num">02</span>
+                  <span class="item-text"><strong>Keyboard Nav</strong><span>Arrow keys, Home, and End support</span></span>
+                </div>
+                <div class="stagger-item" style="--i: 2">
+                  <span class="item-num">03</span>
+                  <span class="item-text"><strong>No Shadow DOM</strong><span>Style elements directly with plain CSS</span></span>
+                </div>
+                <div class="stagger-item" style="--i: 3">
+                  <span class="item-num">04</span>
+                  <span class="item-text"><strong>Custom Events</strong><span>tabchange fires with full detail object</span></span>
+                </div>
+                <div class="stagger-item" style="--i: 4">
+                  <span class="item-num">05</span>
+                  <span class="item-text"><strong>CSS Animations</strong><span>Orchestrated transitions with class hooks</span></span>
+                </div>
+              </tab-panel>
+              <tab-panel>
+                <div class="stagger-item" style="--i: 0">
+                  <span class="item-num">01</span>
+                  <span class="item-text"><strong>Vanilla JS</strong><span>Zero dependencies, pure custom elements</span></span>
+                </div>
+                <div class="stagger-item" style="--i: 1">
+                  <span class="item-num">02</span>
+                  <span class="item-text"><strong>Rollup</strong><span>ESM, CJS, UMD, and minified builds</span></span>
+                </div>
+                <div class="stagger-item" style="--i: 2">
+                  <span class="item-num">03</span>
+                  <span class="item-text"><strong>PostCSS</strong><span>Structural CSS processed and minified</span></span>
+                </div>
+                <div class="stagger-item" style="--i: 3">
+                  <span class="item-num">04</span>
+                  <span class="item-text"><strong>TypeScript</strong><span>Declaration file with full type coverage</span></span>
+                </div>
+                <div class="stagger-item" style="--i: 4">
+                  <span class="item-num">05</span>
+                  <span class="item-text"><strong>ESLint + Prettier</strong><span>Consistent code style enforced</span></span>
+                </div>
+              </tab-panel>
+              <tab-panel>
+                <div class="stagger-item" style="--i: 0">
+                  <span class="item-num">01</span>
+                  <span class="item-text"><strong>Zero Opinions</strong><span>Structural CSS only, visuals are yours</span></span>
+                </div>
+                <div class="stagger-item" style="--i: 1">
+                  <span class="item-num">02</span>
+                  <span class="item-text"><strong>Progressive</strong><span>Works without JS, enhances with it</span></span>
+                </div>
+                <div class="stagger-item" style="--i: 2">
+                  <span class="item-num">03</span>
+                  <span class="item-text"><strong>Composable</strong><span>Nest tab groups without conflicts</span></span>
+                </div>
+                <div class="stagger-item" style="--i: 3">
+                  <span class="item-num">04</span>
+                  <span class="item-text"><strong>Accessible</strong><span>WCAG 2.1 AA keyboard and screen reader support</span></span>
+                </div>
+                <div class="stagger-item" style="--i: 4">
+                  <span class="item-num">05</span>
+                  <span class="item-text"><strong>Lightweight</strong><span>Under 2 KB gzipped with zero deps</span></span>
+                </div>
+              </tab-panel>
+            </tab-group>
+          </div>
+        </section>
+
+        <!-- Style 7: Nested -->
+        <section class="example">
+          <div class="example-label">Style 07</div>
           <h2>Nested</h2>
           <p>
             Tab groups inside tab groups. Each instance manages its own

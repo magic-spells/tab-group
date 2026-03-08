@@ -103,6 +103,44 @@ tab-panel[hidden] { display: none; }
 
 That's it. No fonts, colors, spacing, borders, transitions, shadows, or media queries.
 
+## Animated Transitions
+
+Add CSS animation classes to smoothly transition between panels. The component orchestrates the lifecycle — you define the animations.
+
+```html
+<tab-group animate-out-class="fade-out" animate-in-class="fade-in" animate-timeout="500">
+  ...
+</tab-group>
+```
+
+| Attribute | Description | Default |
+|---|---|---|
+| `animate-out-class` | CSS class added to the outgoing panel during exit | none (instant) |
+| `animate-in-class` | CSS class added to the incoming panel during enter | none (instant) |
+| `animate-timeout` | Fallback timeout in ms if `animationend` never fires | `500` |
+
+```css
+@keyframes fade-out {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+tab-panel.fade-out {
+  animation: fade-out 0.25s ease-out forwards;
+}
+
+tab-panel.fade-in {
+  animation: fade-in 0.25s ease-out forwards;
+}
+```
+
+Either attribute works independently. No attributes = original instant behavior. ARIA updates and the `tabchange` event always fire immediately, before any animation. Rapid clicks cancel cleanly via AbortController.
+
 ## Accessibility
 
 The Tab Group component follows the [WAI-ARIA Tabs Pattern](https://www.w3.org/WAI/ARIA/apg/patterns/tabs/) with:
@@ -125,6 +163,14 @@ The Tab Group component follows the [WAI-ARIA Tabs Pattern](https://www.w3.org/W
 | `<tab-list>`   | Container for tab buttons              |
 | `<tab-button>` | Individual tab trigger                 |
 | `<tab-panel>`  | Content container for each tab         |
+
+### Attributes
+
+| Attribute | Element | Description | Default |
+|---|---|---|---|
+| `animate-out-class` | `<tab-group>` | CSS class for exit animation on outgoing panel | none |
+| `animate-in-class` | `<tab-group>` | CSS class for enter animation on incoming panel | none |
+| `animate-timeout` | `<tab-group>` | Fallback timeout (ms) if `animationend` doesn't fire | `500` |
 
 ### Events
 
