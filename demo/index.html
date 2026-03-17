@@ -79,17 +79,36 @@
       .page {
         max-width: 840px;
         margin: 0 auto;
-        padding: 4rem 2rem 6rem;
+        padding: 2rem 2rem 6rem;
       }
 
       /* ------------------------------------------------
          Hero
       ------------------------------------------------ */
       .hero {
-        padding-bottom: 4rem;
-        border-bottom: 1px solid var(--border);
-        margin-bottom: 4rem;
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        padding: 4rem 2rem 2rem;
         animation: fadeUp 0.8s var(--ease-out) both;
+      }
+
+      .hero::before {
+        content: '';
+        position: absolute;
+        top: -40%;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 900px;
+        height: 900px;
+        background: radial-gradient(
+          ellipse,
+          var(--accent-glow) 0%,
+          transparent 70%
+        );
+        pointer-events: none;
       }
 
       .hero-badge {
@@ -104,6 +123,22 @@
         padding: 0.3rem 1rem;
         margin-bottom: 1.5rem;
         background: var(--accent-glow);
+        text-decoration: none;
+        transition: border-color 0.3s ease, color 0.3s ease;
+      }
+
+      .hero-badge:hover {
+        border-color: var(--accent);
+        color: var(--text);
+      }
+
+      .hero-line {
+        width: 1px;
+        height: 80px;
+        background: linear-gradient(to bottom, var(--accent), transparent);
+        margin-top: 3rem;
+        opacity: 0;
+        animation: fadeUp 1s var(--ease-out) 0.6s both;
       }
 
       .hero h1 {
@@ -125,6 +160,89 @@
         color: var(--text-dim);
         max-width: 540px;
         line-height: 1.7;
+      }
+
+      /* ------------------------------------------------
+         Install Banner
+      ------------------------------------------------ */
+      .install-banner {
+        display: flex;
+        justify-content: center;
+        gap: 2.5rem;
+        flex-wrap: wrap;
+        margin: 0 auto 2.5rem;
+        max-width: 680px;
+        padding: 0 1.5rem;
+        opacity: 0;
+        animation: fadeUp 0.8s var(--ease-out) 0.4s both;
+      }
+
+      .install-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.4rem;
+      }
+
+      .install-label {
+        font-family: var(--font-mono);
+        font-size: 0.65rem;
+        font-weight: 400;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: var(--text-dim);
+      }
+
+      .install-value {
+        font-family: var(--font-mono);
+        font-size: 0.88rem;
+        color: var(--text);
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 0.5em 1.2em;
+        user-select: all;
+        cursor: copy;
+        transition: border-color 0.3s var(--ease-out);
+      }
+
+      .install-value:hover {
+        border-color: var(--accent);
+      }
+
+      .install-size {
+        font-family: var(--font-mono);
+        font-size: 0.88rem;
+        color: var(--accent);
+        padding: 0.5em 0;
+      }
+
+      /* ------------------------------------------------
+         Code Example
+      ------------------------------------------------ */
+      .code-example {
+        max-width: 680px;
+        margin: 0 auto 1rem;
+        padding: 0 1.5rem;
+        opacity: 0;
+        animation: fadeUp 0.8s var(--ease-out) 0.5s both;
+      }
+
+      .code-example pre {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 1.75rem 2rem;
+        overflow-x: auto;
+        font-family: var(--font-mono);
+        font-size: 0.82rem;
+        line-height: 1.7;
+        color: var(--text-dim);
+        -webkit-overflow-scrolling: touch;
+      }
+
+      .code-example .hl-tag {
+        color: var(--accent);
       }
 
       /* ------------------------------------------------
@@ -823,12 +941,21 @@
       ------------------------------------------------ */
       @media (max-width: 600px) {
         .page {
-          padding: 2.5rem 1.25rem 4rem;
+          padding: 1.5rem 1.25rem 4rem;
         }
 
         .hero {
-          padding-bottom: 2.5rem;
-          margin-bottom: 2.5rem;
+          padding: 2.5rem 1.25rem 1.5rem;
+        }
+
+        .install-banner {
+          gap: 1.5rem;
+          margin-bottom: 2rem;
+        }
+
+        .code-example pre {
+          padding: 1.25rem 1rem;
+          font-size: 0.75rem;
         }
 
         .example {
@@ -846,19 +973,46 @@
     </style>
   </head>
   <body>
-    <div class="page">
-      <!-- Hero -->
-      <header class="hero">
-        <div class="hero-badge">@magic-spells/tab-group</div>
-        <h1>Tabs that get out<br />of <em>your</em> way</h1>
-        <p>
-          A fully accessible tab group web component with keyboard
-          navigation and ARIA support. Ships only structural CSS
-          &mdash; all visual styles are yours to define.
-        </p>
-      </header>
+    <!-- Hero -->
+    <header class="hero">
+      <a class="hero-badge" href="https://github.com/magic-spells/tab-group" target="_blank" rel="noopener">@magic-spells/tab-group</a>
+      <h1>Tabs that get out<br />of <em>your</em> way</h1>
+      <p>
+        A fully accessible tab group web component with keyboard
+        navigation and ARIA support. Ships only structural CSS
+        &mdash; all visual styles are yours to define.
+      </p>
+      <div class="hero-line"></div>
+    </header>
 
-      <main>
+    <!-- Install -->
+    <div class="install-banner">
+      <div class="install-item">
+        <span class="install-label">Install</span>
+        <code class="install-value">npm i @magic-spells/tab-group</code>
+      </div>
+      <div class="install-item">
+        <span class="install-label">Size (gzip)</span>
+        <span class="install-size">~1.8 KB</span>
+      </div>
+    </div>
+
+    <!-- Code Example -->
+    <div class="code-example">
+      <pre><span class="hl-tag">&lt;tab-group&gt;</span>
+  <span class="hl-tag">&lt;tab-list&gt;</span>
+    <span class="hl-tag">&lt;tab-button&gt;</span>One<span class="hl-tag">&lt;/tab-button&gt;</span>
+    <span class="hl-tag">&lt;tab-button&gt;</span>Two<span class="hl-tag">&lt;/tab-button&gt;</span>
+    <span class="hl-tag">&lt;tab-button&gt;</span>Three<span class="hl-tag">&lt;/tab-button&gt;</span>
+  <span class="hl-tag">&lt;/tab-list&gt;</span>
+
+  <span class="hl-tag">&lt;tab-panel&gt;</span>Content for tab one<span class="hl-tag">&lt;/tab-panel&gt;</span>
+  <span class="hl-tag">&lt;tab-panel&gt;</span>Content for tab two<span class="hl-tag">&lt;/tab-panel&gt;</span>
+  <span class="hl-tag">&lt;tab-panel&gt;</span>Content for tab three<span class="hl-tag">&lt;/tab-panel&gt;</span>
+<span class="hl-tag">&lt;/tab-group&gt;</span></pre>
+    </div>
+
+    <main class="page">
         <!-- Style 1: Underline -->
         <section class="example">
           <div class="example-label">Style 01</div>
@@ -1415,18 +1569,29 @@
             </code>
           </div>
         </section>
-      </main>
-
       <footer>
         <p>&copy; 2026 Magic Spells &middot; MIT License</p>
       </footer>
-    </div>
+    </main>
 
     <script>
       document.addEventListener('DOMContentLoaded', function () {
         document.querySelectorAll('tab-group').forEach((tabGroup) => {
           tabGroup.addEventListener('tabchange', function (event) {
             console.log('Tab changed:', event.detail);
+          });
+        });
+
+        // Click-to-copy for install command
+        document.addEventListener('click', function (e) {
+          var el = e.target.closest('.install-value');
+          if (!el) return;
+          navigator.clipboard.writeText(el.textContent).then(function () {
+            var original = el.textContent;
+            el.textContent = 'copied!';
+            setTimeout(function () {
+              el.textContent = original;
+            }, 1200);
           });
         });
       });
