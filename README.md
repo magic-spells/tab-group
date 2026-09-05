@@ -1,7 +1,7 @@
 # Tab Group
 
 ![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)
-![Version](https://img.shields.io/badge/version-1.0.0-brightgreen)
+![Version](https://img.shields.io/badge/version-1.2.0-brightgreen)
 
 A lightweight, accessible tab interface web component with keyboard navigation. Ships only structural CSS — you bring your own styles.
 
@@ -12,7 +12,9 @@ A lightweight, accessible tab interface web component with keyboard navigation. 
 - **Fully Accessible** - Built following WAI-ARIA Tab pattern guidelines
 - **Custom Events** - Listen for tab changes with detailed event data
 - **Keyboard Navigation** - Complete keyboard support for accessibility
-- **Auto Consistency** - Ensures tab buttons and panels stay in sync
+- **Controlled** - Drive the active tab with the reflected `active` attribute
+- **Dynamic** - Tabs and panels can be added, removed, or reordered after mount
+- **Auto Consistency** - Fills in missing tab buttons or panels at first connect
 - **Zero Opinions** - No cosmetic CSS; style it however you want
 - **Zero Dependencies** - Lightweight and standalone
 - **Easy Integration** - Works with any framework or vanilla JS
@@ -64,6 +66,57 @@ document
     console.log(`Changed from tab ${previousIndex} to tab ${currentIndex}`);
   });
 ```
+
+### Controlling the Active Tab
+
+The `active` attribute holds the 0-based index of the selected tab. Write it to change tabs, read it to find out which tab is showing — the component reflects it on every click and keypress.
+
+```html
+<tab-group active="1">
+  ...
+</tab-group>
+```
+
+```javascript
+const tabs = document.querySelector('tab-group');
+
+// switch tabs — attribute or property, both work
+tabs.setAttribute('active', '2');
+tabs.active = 2;
+
+// read the current tab
+console.log(tabs.active); // 2
+
+// stays in sync after a click or arrow key
+tabs.addEventListener('tabchange', () => {
+  console.log(tabs.getAttribute('active'));
+});
+```
+
+Setting `active` to the index that is already active does nothing — no animation, no `tabchange`. An out-of-range, non-numeric, or disabled index is ignored and the current tab stays put. An authored `active` at first connect selects that tab without firing `tabchange`. Programmatic activation never steals focus; only a click or key press moves it.
+
+### Disabled Tabs
+
+```html
+<tab-group>
+  <tab-list>
+    <tab-button>One</tab-button>
+    <tab-button disabled>Two</tab-button>
+    <tab-button>Three</tab-button>
+  </tab-list>
+  ...
+</tab-group>
+```
+
+A disabled tab can't be clicked, is skipped by arrow / Home / End navigation, and can't be reached by setting `active`. If the currently active tab becomes disabled it stays active — the surrounding app decides what to do next.
+
+### Dynamic Tabs
+
+Tabs and panels can be added, removed, or reordered at any time. Click and keyboard handling is delegated on the `<tab-group>`, and the component re-pairs buttons with panels by DOM index (`:scope > tab-list > tab-button` ↔ `:scope > tab-panel`), rewriting `id`, `aria-controls`, and `aria-labelledby` after every mutation.
+
+Filler tabs and panels are only ever generated **once, at first connect**, when the authored counts don't match. After that a count mismatch is left alone — no fillers, no error.
+
+Removing the active tab moves activation to the nearest remaining enabled tab at the same position (falling back to the previous one at the end of the list) and fires `tabchange`.
 
 ## Styling
 
@@ -168,15 +221,33 @@ The Tab Group component follows the [WAI-ARIA Tabs Pattern](https://www.w3.org/W
 
 | Attribute | Element | Description | Default |
 |---|---|---|---|
+| `active` | `<tab-group>` | 0-based index of the active tab. Set it to switch tabs; the component reflects it back on every click and keypress, so it is always the source of truth. Out-of-range, non-numeric, or disabled indices are ignored. Programmatic activation (attribute, `.active` property, or an authored `active` at first connect) updates the roving `tabindex` but does **not** move focus — only a click or key press does. | `0` |
+| `disabled` | `<tab-button>` | Makes the tab unactivatable: clicks are ignored, arrow / Home / End roving skips it, and setting `active` to its index does nothing. The component writes `aria-disabled="true"` and `tabindex="-1"`. | none |
 | `animate-out-class` | `<tab-group>` | CSS class for exit animation on outgoing panel | none |
 | `animate-in-class` | `<tab-group>` | CSS class for enter animation on incoming panel | none |
 | `animate-timeout` | `<tab-group>` | Fallback timeout (ms) if `animationend` doesn't fire | `500` |
+
+### Properties
+
+| Property | Element | Description |
+|---|---|---|
+| `active` | `<tab-group>` | Get or set the active tab index. Setting it behaves exactly like setting the `active` attribute. |
+| `tabButtons` | `<tab-group>` | Live-recomputed array of the group's own `<tab-button>` elements. |
+| `tabPanels` | `<tab-group>` | Live-recomputed array of the group's own `<tab-panel>` elements. |
+
+### Methods
+
+| Method | Description |
+|---|---|
+| `setActiveTab(index)` | Activates a tab and moves focus to it — the same path a click takes. |
 
 ### Events
 
 | Event       | Detail                                                                                  | Description                       |
 | ----------- | --------------------------------------------------------------------------------------- | --------------------------------- |
 | `tabchange` | `{ previousIndex, currentIndex, previousTab, currentTab, previousPanel, currentPanel }` | Fired when the active tab changes |
+
+The event bubbles and is `composed`, so a wrapper can listen for it at its own root.
 
 ## Examples
 

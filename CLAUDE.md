@@ -25,6 +25,18 @@ Accessible tab group web component. Four custom elements: `<tab-group>`, `<tab-l
 - `sideEffects: true` — component self-registers custom elements on import
 - Module-level `instanceCount` for unique ARIA IDs across instances
 - `files: ["dist/"]` in package.json — only dist is published
+- Observed `active` attribute on `<tab-group>` (0-based index), reflected on every
+  activation — the attribute is the source of truth for readers; matching `active` property
+- Programmatic activation (`active` attribute/property, authored `active` at connect) never
+  calls `focus()`; only click / keyboard activation does (`setActiveTab` focuses)
+- `disabled` on `<tab-button>`: not clickable, skipped by roving, `aria-disabled="true"`
+- Click + keydown are delegated on the `<tab-group>` itself (not the `<tab-list>`), so a
+  replaced or late-added tab-list keeps working
+- A MutationObserver (childList + subtree, `disabled` attribute filter) re-collects and
+  re-wires tabs/panels after adds, removes, and reorders
+- `ensureConsistentTabsAndPanels` runs ONCE at first connect only — later count mismatches
+  generate nothing and never throw
+- `tabchange` is `bubbles: true, composed: true` so a wrapper can listen at its root
 - CSS animation support via `animate-out-class`, `animate-in-class`, `animate-timeout` attributes
 - Animation lifecycle: ARIA updates immediately, then animate-out → swap hidden → animate-in
 - AbortController-based cancellation handles rapid clicks cleanly
