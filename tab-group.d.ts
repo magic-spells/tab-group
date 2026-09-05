@@ -1,9 +1,22 @@
 export interface TabChangeEventDetail {
+	/**
+	 * Index of the previously active tab, or `-1` when there was none. When the
+	 * active tab is removed from the DOM this is its index in the *old* list,
+	 * which no longer addresses anything in the current one.
+	 */
 	previousIndex: number;
 	currentIndex: number;
-	previousTab: HTMLElement;
+	/**
+	 * The previously active tab. `undefined` when there was no previous
+	 * selection; when the active tab was removed this is the detached element.
+	 */
+	previousTab: HTMLElement | undefined;
 	currentTab: HTMLElement;
-	previousPanel: HTMLElement;
+	/**
+	 * The previously active panel. `undefined` when there was no previous
+	 * selection; when the active tab was removed this is the detached element.
+	 */
+	previousPanel: HTMLElement | undefined;
 	currentPanel: HTMLElement;
 }
 

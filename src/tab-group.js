@@ -73,30 +73,6 @@ export default class TabGroup extends HTMLElement {
 			this._instanceId = `tg-${instanceCount++}`;
 		}
 
-		// ensure that the number of <tab-button> and <tab-panel> elements match.
-		// first connect only — later mutations are left exactly as authored.
-		if (!this._fillersChecked) {
-			this._fillersChecked = true;
-			this.ensureConsistentTabsAndPanels();
-		}
-
-		// collect the tab-list, buttons and panels, then write roles / ids / aria
-		this._collect();
-		if (!this.tabList) return;
-		this._wire();
-
-		// pick the initial tab: an authored `active` attribute wins, else 0.
-		// applied silently — no tabchange on first paint.
-		if (!this._ready) {
-			const authored = this._parseIndex(this.getAttribute('active'));
-			const initial = authored === null ? 0 : authored;
-			// applied directly rather than through _select: the first paint is a
-			// state write, never a transition, so animation classes never run
-			this._applyState(initial);
-			this._reflect(this.tabButtons.length ? initial : null);
-			this._ready = true;
-		}
-
 		// store bound handlers so we can remove them in disconnectedCallback.
 		// they live on the <tab-group> itself rather than the <tab-list>, so a
 		// replaced or late-added tab-list keeps working with no re-wiring.
@@ -118,6 +94,47 @@ export default class TabGroup extends HTMLElement {
 			attributes: true,
 			attributeFilter: ['disabled'],
 		});
+
+		// wire up whatever is here now. an empty shell is fine — the observer
+		// above will call _sync() as soon as tabs and panels arrive.
+		this._init();
+	}
+
+	/**
+	 * @function _init
+	 * performs the one-time setup: filler generation (first wiring only),
+	 * roles / ids / aria, and the initial selection. safe to call repeatedly —
+	 * it does nothing until there is actually something to wire.
+	 */
+	_init() {
+		this._collect();
+
+		// nothing authored yet: stay dormant so a group that is filled on a
+		// later tick still gets its first-connect treatment when it arrives
+		if (!this.tabList && !this.tabButtons.length && !this.tabPanels.length) {
+			return;
+		}
+
+		// ensure that the number of <tab-button> and <tab-panel> elements match.
+		// first wiring only — later mutations are left exactly as authored.
+		if (!this._fillersChecked) {
+			this._fillersChecked = true;
+			this.ensureConsistentTabsAndPanels();
+			this._collect();
+		}
+
+		if (!this.tabList) return;
+		this._wire();
+
+		// pick the initial tab: an authored `active` attribute wins, else 0.
+		// applied silently — no tabchange on first paint.
+		const authored = this._parseIndex(this.getAttribute('active'));
+		const initial = authored === null ? 0 : authored;
+		// applied directly rather than through _select: the first paint is a
+		// state write, never a transition, so animation classes never run
+		this._applyState(this.tabButtons.length ? initial : -1);
+		this._reflect(this.tabButtons.length ? initial : null);
+		this._ready = true;
 	}
 
 	/**
@@ -250,11 +267,11 @@ export default class TabGroup extends HTMLElement {
 				tab.removeAttribute('aria-disabled');
 			}
 
-			// make sure a newly added button has a selection state to read
-			if (!tab.hasAttribute('aria-selected')) {
-				tab.setAttribute('aria-selected', 'false');
-				tab.setAttribute('tabindex', '-1');
-			}
+			// clear any inherited selection state: a button moved in from another
+			// group can arrive carrying aria-selected="true". _applyState always
+			// runs after _wire and writes the real state from the active index.
+			tab.setAttribute('aria-selected', 'false');
+			tab.setAttribute('tabindex', '-1');
 		});
 
 		this.tabPanels.forEach((panel, index) => {
@@ -275,7 +292,11 @@ export default class TabGroup extends HTMLElement {
 	 * and never throws on a count mismatch.
 	 */
 	_sync() {
-		if (!this._ready) return;
+		// still an empty shell: this mutation may be the content arriving
+		if (!this._ready) {
+			this._init();
+			return;
+		}
 
 		// remember the active tab so we can follow it across a reorder
 		const previousButtons = this.tabButtons || [];
@@ -301,6 +322,7 @@ export default class TabGroup extends HTMLElement {
 		// same position
 		const fallback = this._nearestEnabled(previousIndex < 0 ? 0 : previousIndex);
 		if (fallback === -1) {
+			this._applyState(-1);
 			this._reflect(null);
 			return;
 		}
@@ -363,6 +385,11 @@ export default class TabGroup extends HTMLElement {
 			// the active tab stays tabbable so the tablist is always reachable
 			tab.setAttribute('tabindex', isActive ? '0' : '-1');
 		});
+
+		// never yank panel visibility out from under a running transition — the
+		// animation owns `hidden` until it settles on the same active index
+		if (this._animationController) return;
+
 		this.tabPanels.forEach((panel, i) => {
 			panel.hidden = i !== index;
 		});

@@ -93,6 +93,8 @@ tabs.addEventListener('tabchange', () => {
 });
 ```
 
+Once connected the `active` attribute is always present: removing it, or writing an invalid value, is written straight back as the index that is really active.
+
 Setting `active` to the index that is already active does nothing — no animation, no `tabchange`. An out-of-range, non-numeric, or disabled index is ignored and the current tab stays put. An authored `active` at first connect selects that tab without firing `tabchange`. Programmatic activation never steals focus; only a click or key press moves it.
 
 ### Disabled Tabs

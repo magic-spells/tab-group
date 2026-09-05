@@ -34,6 +34,11 @@ Accessible tab group web component. Four custom elements: `<tab-group>`, `<tab-l
   replaced or late-added tab-list keeps working
 - A MutationObserver (childList + subtree, `disabled` attribute filter) re-collects and
   re-wires tabs/panels after adds, removes, and reorders
+- Listeners + observer are attached BEFORE the empty-group guard, so a `<tab-group>`
+  rendered as an empty shell and filled on a later tick still initializes (`_init` is
+  idempotent and stays dormant until there is something to wire)
+- `_applyState` skips panel `hidden` writes while `_animationController` is live — a
+  descendant mutation mid-transition must not yank visibility out from under it
 - `ensureConsistentTabsAndPanels` runs ONCE at first connect only — later count mismatches
   generate nothing and never throw
 - `tabchange` is `bubbles: true, composed: true` so a wrapper can listen at its root
