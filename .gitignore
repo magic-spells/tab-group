@@ -22,3 +22,6 @@ Thumbs.db
 
 # Package files
 *.tgz
+
+# Playwright MCP session output
+.playwright-mcp/

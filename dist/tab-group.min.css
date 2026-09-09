@@ -1,1 +1,1 @@
-tab-group{display:block}tab-list{display:flex;overflow-x:auto;overflow-y:hidden}tab-button{cursor:pointer;display:block;user-select:none}tab-panel[hidden]{display:none}
+tab-group{display:block}tab-list{display:flex;overflow-x:auto;overflow-y:hidden}tab-button{cursor:pointer;display:block;user-select:none}tab-panel[hidden]{display:none}tab-button[aria-disabled=true]{cursor:default}

@@ -17,3 +17,7 @@ tab-button {
 tab-panel[hidden] {
   display: none;
 }
+
+tab-button[aria-disabled='true'] {
+  cursor: default;
+}
