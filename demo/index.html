@@ -373,6 +373,87 @@
       }
 
       /* ------------------------------------------------
+         Controlled: underline look plus a control bar
+      ------------------------------------------------ */
+      .style-controlled tab-list {
+        gap: 0;
+        border-bottom: 1px solid var(--border);
+      }
+
+      .style-controlled tab-button {
+        padding: 0.75rem 1.25rem;
+        font-family: var(--font-body);
+        font-size: 0.85rem;
+        color: var(--text-dim);
+        border-bottom: 2px solid transparent;
+        transition:
+          color 0.25s var(--ease-out),
+          border-color 0.25s var(--ease-out);
+      }
+
+      .style-controlled tab-button:hover {
+        color: var(--text);
+      }
+
+      .style-controlled tab-button[aria-selected='true'] {
+        color: var(--lavender);
+        border-bottom-color: var(--lavender);
+        font-weight: 500;
+      }
+
+      .style-controlled tab-button[aria-disabled='true'],
+      .style-controlled tab-button[aria-disabled='true']:hover {
+        color: var(--text-dim);
+        opacity: 0.3;
+      }
+
+      .style-controlled tab-panel {
+        padding: 1.5rem 0.25rem 0.5rem;
+        color: var(--text-dim);
+        font-size: 0.9rem;
+        line-height: 1.7;
+      }
+
+      .style-controlled tab-panel h3 {
+        font-family: var(--font-display);
+        font-size: 1.3rem;
+        color: var(--text);
+        margin-bottom: 0.5rem;
+        font-weight: 400;
+      }
+
+      .control-bar {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 1.25rem;
+      }
+
+      .control-bar button {
+        font-family: var(--font-body);
+        font-size: 0.8rem;
+        color: var(--text);
+        background: var(--surface-raised);
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        padding: 0.4rem 0.8rem;
+        cursor: pointer;
+        transition: border-color 0.2s var(--ease-out);
+      }
+
+      .control-bar button:hover {
+        border-color: var(--lavender);
+      }
+
+      .control-readout {
+        font-family: var(--font-mono);
+        font-size: 0.75rem;
+        color: var(--text-dim);
+        margin-left: auto;
+      }
+
+      /* ------------------------------------------------
          Style 2: Pill/capsule tabs (teal)
       ------------------------------------------------ */
       .style-pills tab-list {
@@ -993,7 +1074,7 @@
       </div>
       <div class="install-item">
         <span class="install-label">Size (gzip)</span>
-        <span class="install-size">~1.8 KB</span>
+        <span class="install-size">~2.6 KB</span>
       </div>
     </div>
 
@@ -1103,7 +1184,7 @@
               <tab-panel>
                 <h3>Deploy</h3>
                 <p>
-                  Under 2 KB gzipped with zero dependencies. No build
+                  Around 2.6 KB gzipped with zero dependencies. No build
                   step required for basic usage. Tree-shaking friendly
                   for bundled projects.
                 </p>
@@ -1338,7 +1419,7 @@
                 </div>
                 <div class="stagger-item" style="--i: 4">
                   <span class="item-num">05</span>
-                  <span class="item-text"><strong>Lightweight</strong><span>Under 2 KB gzipped with zero deps</span></span>
+                  <span class="item-text"><strong>Lightweight</strong><span>Around 2.6 KB gzipped, zero deps</span></span>
                 </div>
               </tab-panel>
             </tab-group>
@@ -1504,6 +1585,95 @@
           </div>
         </section>
 
+        <!-- Controlled / dynamic -->
+        <section class="example">
+          <div class="example-label">Controlled</div>
+          <h2>Driven From Outside</h2>
+          <p>
+            The <code>active</code> attribute is the source of truth.
+            Set it to switch tabs; the component writes it back on
+            every click and keypress. The third tab is
+            <code>disabled</code> &mdash; arrows skip it and setting
+            <code>active</code> to it is ignored.
+          </p>
+
+          <div class="demo-surface style-controlled">
+            <div class="control-bar">
+              <button type="button" data-tg-prev>&larr; Prev</button>
+              <button type="button" data-tg-next>Next &rarr;</button>
+              <button type="button" data-tg-set="2">Set active=2 (disabled)</button>
+              <button type="button" data-tg-set="9">Set active=9 (out of range)</button>
+              <button type="button" data-tg-append>Append tab + panel</button>
+              <span class="control-readout" data-tg-readout>active=0</span>
+            </div>
+
+            <tab-group id="controlled">
+              <tab-list>
+                <tab-button>Alpha</tab-button>
+                <tab-button>Beta</tab-button>
+                <tab-button disabled>Gamma</tab-button>
+                <tab-button>Delta</tab-button>
+              </tab-list>
+              <tab-panel>
+                <h3>Alpha</h3>
+                <p>
+                  Click Next and watch the <code>active</code>
+                  attribute on the <code>&lt;tab-group&gt;</code>
+                  update in the readout &mdash; a wrapper can read it
+                  back at any time.
+                </p>
+              </tab-panel>
+              <tab-panel>
+                <h3>Beta</h3>
+                <p>
+                  Setting <code>active</code> to the value it already
+                  holds is a no-op: no animation, no
+                  <code>tabchange</code>.
+                </p>
+              </tab-panel>
+              <tab-panel>
+                <h3>Gamma</h3>
+                <p>
+                  This panel is unreachable while its tab carries
+                  <code>disabled</code>.
+                </p>
+              </tab-panel>
+              <tab-panel>
+                <h3>Delta</h3>
+                <p>
+                  Appended tabs land here too. Buttons and panels are
+                  paired by DOM index and re-wired after every
+                  mutation &mdash; no filler elements are ever
+                  generated after first connect.
+                </p>
+              </tab-panel>
+            </tab-group>
+          </div>
+        </section>
+
+        <!-- Count mismatch: filler generation at first connect -->
+        <section class="example">
+          <div class="example-label">First Connect</div>
+          <h2>Filler Generation</h2>
+          <p>
+            Authored with three panels but only one tab button. On
+            first connect the component fills in the missing buttons
+            &mdash; and only then. Later DOM changes never generate
+            fillers.
+          </p>
+
+          <div class="demo-surface style-controlled">
+            <tab-group id="mismatch">
+              <tab-list>
+                <tab-button>Authored</tab-button>
+              </tab-list>
+              <tab-panel><h3>One</h3><p>Authored panel.</p></tab-panel>
+              <tab-panel><h3>Two</h3><p>Got a filler button.</p></tab-panel>
+              <tab-panel><h3>Three</h3><p>Got a filler button.</p></tab-panel>
+            </tab-group>
+          </div>
+        </section>
+
         <!-- Keyboard navigation -->
         <section class="example">
           <div class="example-label">Accessibility</div>
@@ -1581,6 +1751,64 @@
             console.log('Tab changed:', event.detail);
           });
         });
+
+        // Controlled example: prev / next / set active / append
+        var controlled = document.getElementById('controlled');
+        if (controlled) {
+          var readout = document.querySelector('[data-tg-readout]');
+          var appended = 0;
+
+          var sync = function () {
+            readout.textContent =
+              'active=' + controlled.getAttribute('active');
+          };
+          sync();
+          controlled.addEventListener('tabchange', sync);
+
+          document
+            .querySelector('[data-tg-prev]')
+            .addEventListener('click', function () {
+              controlled.active = controlled.active - 1;
+              sync();
+            });
+
+          document
+            .querySelector('[data-tg-next]')
+            .addEventListener('click', function () {
+              controlled.active = controlled.active + 1;
+              sync();
+            });
+
+          document
+            .querySelectorAll('[data-tg-set]')
+            .forEach(function (btn) {
+              btn.addEventListener('click', function () {
+                controlled.setAttribute('active', btn.dataset.tgSet);
+                sync();
+              });
+            });
+
+          document
+            .querySelector('[data-tg-append]')
+            .addEventListener('click', function () {
+              appended += 1;
+              var label = 'Extra ' + appended;
+              var button = document.createElement('tab-button');
+              button.textContent = label;
+              controlled
+                .querySelector(':scope > tab-list')
+                .appendChild(button);
+
+              var panel = document.createElement('tab-panel');
+              panel.innerHTML =
+                '<h3>' +
+                label +
+                '</h3><p>Added after mount. Clickable, keyboard-reachable, and wired to its button.</p>';
+              controlled.appendChild(panel);
+
+              setTimeout(sync, 0);
+            });
+        }
 
         // Click-to-copy for install command
         document.addEventListener('click', function (e) {

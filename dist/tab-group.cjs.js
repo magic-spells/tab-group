@@ -15,10 +15,22 @@ let instanceCount = 0;
  */
 class TabGroup extends HTMLElement {
 	/**
+	 * attributes watched by the browser.
+	 * `active` is the 0-based index of the selected tab, and is reflected by
+	 * the component whenever the active tab changes.
+	 */
+	static get observedAttributes() {
+		return ['active'];
+	}
+
+	/**
 	 * @function ensureConsistentTabsAndPanels
 	 * makes sure there is an equal number of <tab-button> and <tab-panel> elements.
 	 * if there are more panels than tabs, inject extra tab buttons.
 	 * if there are more tabs than panels, inject extra panels.
+	 *
+	 * this only ever runs once, on first connect. later dom mutations never
+	 * generate filler elements.
 	 */
 	ensureConsistentTabsAndPanels() {
 		// get current tabs and panels scoped to direct children only
@@ -63,62 +75,68 @@ class TabGroup extends HTMLElement {
 			this._instanceId = `tg-${instanceCount++}`;
 		}
 
-		// ensure that the number of <tab-button> and <tab-panel> elements match
-		this.ensureConsistentTabsAndPanels();
-
-		// find the <tab-list> element (should be exactly one)
-		this.tabList = this.querySelector(':scope > tab-list');
-		if (!this.tabList) return;
-
-		// find all <tab-button> elements inside the <tab-list>
-		this.tabButtons = Array.from(
-			this.tabList.querySelectorAll('tab-button')
-		);
-
-		// find all <tab-panel> elements inside the <tab-group>
-		this.tabPanels = Array.from(this.querySelectorAll(':scope > tab-panel'));
-
-		const prefix = this._instanceId;
-
-		// initialize each tab-button with roles, ids and aria attributes
-		this.tabButtons.forEach((tab, index) => {
-			const tabId = `${prefix}-tab-${index}`;
-			const panelId = `${prefix}-panel-${index}`;
-			tab.id = tabId;
-			tab.setAttribute('role', 'tab');
-			tab.setAttribute('aria-controls', panelId);
-
-			// first tab is active by default
-			if (index === 0) {
-				tab.setAttribute('aria-selected', 'true');
-				tab.setAttribute('tabindex', '0');
-			} else {
-				tab.setAttribute('aria-selected', 'false');
-				tab.setAttribute('tabindex', '-1');
-			}
-		});
-
-		// initialize each tab-panel with roles, ids and aria attributes
-		this.tabPanels.forEach((panel, index) => {
-			const panelId = `${prefix}-panel-${index}`;
-			panel.id = panelId;
-			panel.setAttribute('role', 'tabpanel');
-			panel.setAttribute('aria-labelledby', `${prefix}-tab-${index}`);
-
-			// hide panels except for the first one
-			panel.hidden = index !== 0;
-		});
-
-		// set up keyboard navigation and click delegation on the <tab-list>
-		this.tabList.setAttribute('role', 'tablist');
-
-		// store bound handlers so we can remove them in disconnectedCallback
+		// store bound handlers so we can remove them in disconnectedCallback.
+		// they live on the <tab-group> itself rather than the <tab-list>, so a
+		// replaced or late-added tab-list keeps working with no re-wiring.
 		if (!this._onKeyDown) {
 			this._onKeyDown = (e) => this.onKeyDown(e);
 			this._onClick = (e) => this.onClick(e);
 		}
-		this.tabList.addEventListener('keydown', this._onKeyDown);
-		this.tabList.addEventListener('click', this._onClick);
+		this.addEventListener('keydown', this._onKeyDown);
+		this.addEventListener('click', this._onClick);
+
+		// watch for tabs / panels being added, removed or reordered, and for
+		// `disabled` flipping on a tab-button
+		if (!this._observer) {
+			this._observer = new MutationObserver(() => this._sync());
+		}
+		this._observer.observe(this, {
+			childList: true,
+			subtree: true,
+			attributes: true,
+			attributeFilter: ['disabled'],
+		});
+
+		// wire up whatever is here now. an empty shell is fine — the observer
+		// above will call _sync() as soon as tabs and panels arrive.
+		this._init();
+	}
+
+	/**
+	 * @function _init
+	 * performs the one-time setup: filler generation (first wiring only),
+	 * roles / ids / aria, and the initial selection. safe to call repeatedly —
+	 * it does nothing until there is actually something to wire.
+	 */
+	_init() {
+		this._collect();
+
+		// nothing authored yet: stay dormant so a group that is filled on a
+		// later tick still gets its first-connect treatment when it arrives
+		if (!this.tabList && !this.tabButtons.length && !this.tabPanels.length) {
+			return;
+		}
+
+		// ensure that the number of <tab-button> and <tab-panel> elements match.
+		// first wiring only — later mutations are left exactly as authored.
+		if (!this._fillersChecked) {
+			this._fillersChecked = true;
+			this.ensureConsistentTabsAndPanels();
+			this._collect();
+		}
+
+		if (!this.tabList) return;
+		this._wire();
+
+		// pick the initial tab: an authored `active` attribute wins, else 0.
+		// applied silently — no tabchange on first paint.
+		const authored = this._parseIndex(this.getAttribute('active'));
+		const initial = authored === null ? 0 : authored;
+		// applied directly rather than through _select: the first paint is a
+		// state write, never a transition, so animation classes never run
+		this._applyState(this.tabButtons.length ? initial : -1);
+		this._reflect(this.tabButtons.length ? initial : null);
+		this._ready = true;
 	}
 
 	/**
@@ -129,10 +147,272 @@ class TabGroup extends HTMLElement {
 			this._animationController.abort();
 			this._animationController = null;
 		}
-		if (this.tabList && this._onKeyDown) {
-			this.tabList.removeEventListener('keydown', this._onKeyDown);
-			this.tabList.removeEventListener('click', this._onClick);
+		if (this._onKeyDown) {
+			this.removeEventListener('keydown', this._onKeyDown);
+			this.removeEventListener('click', this._onClick);
 		}
+		if (this._observer) this._observer.disconnect();
+	}
+
+	/**
+	 * responds to the `active` attribute being set from outside
+	 */
+	attributeChangedCallback(name, oldValue, newValue) {
+		if (name !== 'active') return;
+		// ignore our own reflection writes, and anything before first connect
+		// (connectedCallback reads the authored value itself)
+		if (this._reflecting || !this._ready) return;
+
+		const index = this._parseIndex(newValue);
+		// non-numeric, out of range, or disabled → ignored, current tab stays.
+		// put the real index back so readers never see a bogus value.
+		if (index === null) {
+			const current = this.activeIndex;
+			this._reflect(current === -1 ? null : current);
+			return;
+		}
+		// already active → no-op: no event, no animation
+		if (index === this.activeIndex) return;
+
+		this._select(index, { emit: true, focus: false });
+	}
+
+	/**
+	 * the index of the currently active tab, or -1 if there is none
+	 * @type {number}
+	 */
+	get activeIndex() {
+		if (!this.tabButtons) return -1;
+		return this.tabButtons.findIndex(
+			(tab) => tab.getAttribute('aria-selected') === 'true'
+		);
+	}
+
+	/**
+	 * the active tab index. setting it behaves exactly like setting the
+	 * `active` attribute.
+	 * @type {number}
+	 */
+	get active() {
+		return this.activeIndex;
+	}
+
+	set active(value) {
+		const index = this._parseIndex(value);
+		if (index === null) return;
+		if (index === this.activeIndex) return;
+		this._select(index, { emit: true, focus: false });
+	}
+
+	/**
+	 * @function _parseIndex
+	 * validates a candidate index — returns a usable number, or null when the
+	 * value is non-numeric, out of range, or points at a disabled tab
+	 */
+	_parseIndex(value) {
+		if (value === null || value === undefined || value === '') return null;
+		const index = Number(value);
+		if (!Number.isInteger(index)) return null;
+		if (!this.tabButtons || index < 0 || index >= this.tabButtons.length) {
+			return null;
+		}
+		if (this._isDisabled(this.tabButtons[index])) return null;
+		return index;
+	}
+
+	/**
+	 * @function _isDisabled
+	 * true when a tab-button carries the `disabled` attribute
+	 */
+	_isDisabled(tab) {
+		return !!tab && tab.hasAttribute('disabled');
+	}
+
+	/**
+	 * @function _collect
+	 * re-reads the tab-list, buttons and panels from the dom. buttons and
+	 * panels are paired by dom index:
+	 * `:scope > tab-list > tab-button` ↔ `:scope > tab-panel`
+	 */
+	_collect() {
+		this.tabList = this.querySelector(':scope > tab-list');
+		this.tabButtons = this.tabList
+			? Array.from(this.tabList.querySelectorAll(':scope > tab-button'))
+			: [];
+		this.tabPanels = Array.from(this.querySelectorAll(':scope > tab-panel'));
+	}
+
+	/**
+	 * @function _wire
+	 * (re)writes roles, ids and aria wiring for every tab and panel
+	 */
+	_wire() {
+		const prefix = this._instanceId;
+
+		this.tabList.setAttribute('role', 'tablist');
+
+		this.tabButtons.forEach((tab, index) => {
+			tab.id = `${prefix}-tab-${index}`;
+			tab.setAttribute('role', 'tab');
+
+			// only claim a panel that actually exists. counts can mismatch after
+			// a mutation, and we never generate fillers to paper over it.
+			if (this.tabPanels[index]) {
+				tab.setAttribute('aria-controls', `${prefix}-panel-${index}`);
+			} else {
+				tab.removeAttribute('aria-controls');
+			}
+
+			if (this._isDisabled(tab)) {
+				tab.setAttribute('aria-disabled', 'true');
+			} else {
+				tab.removeAttribute('aria-disabled');
+			}
+
+			// clear any inherited selection state: a button moved in from another
+			// group can arrive carrying aria-selected="true". _applyState always
+			// runs after _wire and writes the real state from the active index.
+			tab.setAttribute('aria-selected', 'false');
+			tab.setAttribute('tabindex', '-1');
+		});
+
+		this.tabPanels.forEach((panel, index) => {
+			panel.id = `${prefix}-panel-${index}`;
+			panel.setAttribute('role', 'tabpanel');
+			if (this.tabButtons[index]) {
+				panel.setAttribute('aria-labelledby', `${prefix}-tab-${index}`);
+			} else {
+				panel.removeAttribute('aria-labelledby');
+			}
+		});
+	}
+
+	/**
+	 * @function _sync
+	 * called by the MutationObserver after tabs / panels are added, removed or
+	 * reordered, or a `disabled` attribute changes. never generates fillers,
+	 * and never throws on a count mismatch.
+	 */
+	_sync() {
+		// still an empty shell: this mutation may be the content arriving
+		if (!this._ready) {
+			this._init();
+			return;
+		}
+
+		// remember the active tab so we can follow it across a reorder
+		const previousButtons = this.tabButtons || [];
+		const previousPanels = this.tabPanels || [];
+		const previousIndex = this.activeIndex;
+		const previousTab = previousButtons[previousIndex] || null;
+		const previousPanel = previousPanels[previousIndex] || null;
+
+		this._collect();
+		if (!this.tabList) return;
+		this._wire();
+
+		// the active tab survived: re-point the reflected index and panel
+		// visibility at its (possibly new) position — same tab, so no event
+		const movedIndex = previousTab ? this.tabButtons.indexOf(previousTab) : -1;
+		if (movedIndex !== -1) {
+			this._applyState(movedIndex);
+			this._reflect(movedIndex);
+			return;
+		}
+
+		// the active tab is gone: fall back to the nearest enabled tab at the
+		// same position
+		const fallback = this._nearestEnabled(previousIndex < 0 ? 0 : previousIndex);
+		if (fallback === -1) {
+			this._applyState(-1);
+			this._reflect(null);
+			return;
+		}
+
+		this._applyState(fallback);
+		this._reflect(fallback);
+
+		if (previousTab) {
+			this._emit(previousIndex, fallback, previousTab, previousPanel);
+		}
+	}
+
+	/**
+	 * @function _nearestEnabled
+	 * finds the closest enabled tab to `index`, searching forward then back.
+	 * returns -1 when there is no enabled tab.
+	 */
+	_nearestEnabled(index) {
+		const count = this.tabButtons.length;
+		for (let offset = 0; offset < count; offset++) {
+			const forward = index + offset;
+			if (forward < count && !this._isDisabled(this.tabButtons[forward])) {
+				return forward;
+			}
+			const back = index - offset;
+			if (
+				back >= 0 &&
+				back < count &&
+				!this._isDisabled(this.tabButtons[back])
+			) {
+				return back;
+			}
+		}
+		return -1;
+	}
+
+	/**
+	 * @function _reflect
+	 * writes the `active` attribute without re-entering attributeChangedCallback
+	 */
+	_reflect(index) {
+		this._reflecting = true;
+		if (index === null) {
+			this.removeAttribute('active');
+		} else {
+			this.setAttribute('active', String(index));
+		}
+		this._reflecting = false;
+	}
+
+	/**
+	 * @function _applyState
+	 * writes aria-selected / tabindex on every button and shows the matching
+	 * panel instantly. used for structural re-syncs, never for user activation.
+	 */
+	_applyState(index) {
+		this.tabButtons.forEach((tab, i) => {
+			const isActive = i === index;
+			tab.setAttribute('aria-selected', isActive ? 'true' : 'false');
+			// the active tab stays tabbable so the tablist is always reachable
+			tab.setAttribute('tabindex', isActive ? '0' : '-1');
+		});
+
+		// never yank panel visibility out from under a running transition — the
+		// animation owns `hidden` until it settles on the same active index
+		if (this._animationController) return;
+
+		this.tabPanels.forEach((panel, i) => {
+			panel.hidden = i !== index;
+		});
+	}
+
+	/**
+	 * @function _emit
+	 * dispatches the tabchange event
+	 */
+	_emit(previousIndex, index, previousTab, previousPanel) {
+		const detail = {
+			previousIndex,
+			currentIndex: index,
+			previousTab: previousTab ?? this.tabButtons[previousIndex],
+			currentTab: this.tabButtons[index],
+			previousPanel: previousPanel ?? this.tabPanels[previousIndex],
+			currentPanel: this.tabPanels[index],
+		};
+		this.dispatchEvent(
+			new CustomEvent('tabchange', { detail, bubbles: true, composed: true })
+		);
 	}
 
 	/**
@@ -192,10 +472,10 @@ class TabGroup extends HTMLElement {
 
 		// Phase 2: swap hidden
 		if (oldPanel) oldPanel.hidden = true;
-		newPanel.hidden = false;
+		if (newPanel) newPanel.hidden = false;
 
 		// Phase 3: animate in
-		if (config.inClass) {
+		if (config.inClass && newPanel) {
 			if (signal.aborted) return;
 			// force reflow so the browser sees the element before animating
 			newPanel.offsetHeight;
@@ -209,10 +489,23 @@ class TabGroup extends HTMLElement {
 	 * @param {number} index - index of the tab to activate
 	 */
 	setActiveTab(index) {
+		this._select(index, { emit: true, focus: true });
+	}
+
+	/**
+	 * @function _select
+	 * the single activation path — shared by clicks, keyboard navigation, the
+	 * `active` attribute and the `active` property
+	 * @param {number} index - index of the tab to activate
+	 * @param {{emit?: boolean, focus?: boolean}} options
+	 */
+	_select(index, { emit = true, focus = true } = {}) {
+		if (!this.tabButtons) return;
 		if (index < 0 || index >= this.tabButtons.length) return;
-		const previousIndex = this.tabButtons.findIndex(
-			(tab) => tab.getAttribute('aria-selected') === 'true'
-		);
+		// a disabled tab can never become active
+		if (this._isDisabled(this.tabButtons[index])) return;
+
+		const previousIndex = this.activeIndex;
 
 		// cancel any in-flight animation
 		if (this._animationController) {
@@ -229,31 +522,25 @@ class TabGroup extends HTMLElement {
 			const isActive = i === index;
 			tab.setAttribute('aria-selected', isActive ? 'true' : 'false');
 			tab.setAttribute('tabindex', isActive ? '0' : '-1');
-			if (isActive) {
+			if (isActive && focus) {
 				tab.focus();
 			}
 		});
 
+		// the `active` attribute is always the source of truth for readers
+		this._reflect(index);
+
 		// dispatch event only if the tab actually changed
-		if (previousIndex !== index) {
-			const detail = {
-				previousIndex,
-				currentIndex: index,
-				previousTab: this.tabButtons[previousIndex],
-				currentTab: this.tabButtons[index],
-				previousPanel: this.tabPanels[previousIndex],
-				currentPanel: this.tabPanels[index],
-			};
-			this.dispatchEvent(
-				new CustomEvent('tabchange', { detail, bubbles: true })
-			);
+		if (emit && previousIndex !== index) {
+			this._emit(previousIndex, index);
 		}
 
 		const config = this._getAnimateConfig();
 		const oldPanel = previousIndex >= 0 ? this.tabPanels[previousIndex] : null;
 		const newPanel = this.tabPanels[index];
 
-		if (!config.hasAnimation || previousIndex === index) {
+		// nothing to animate out of when there was no previous selection
+		if (!config.hasAnimation || previousIndex === index || previousIndex < 0) {
 			// instant switch (original behavior)
 			this.tabPanels.forEach((panel, i) => {
 				panel.hidden = i !== index;
@@ -271,8 +558,8 @@ class TabGroup extends HTMLElement {
 
 		if (skipOut) {
 			// just animate in the new panel
-			newPanel.hidden = false;
-			if (config.inClass) {
+			if (newPanel) newPanel.hidden = false;
+			if (config.inClass && newPanel) {
 				newPanel.offsetHeight;
 				this._waitForAnimation(newPanel, config.inClass, config.timeout, controller.signal).then(() => {
 					if (this._animationController === controller) {
@@ -294,17 +581,21 @@ class TabGroup extends HTMLElement {
 
 	/**
 	 * @function onClick
-	 * handles click events on the <tab-list> via event delegation
+	 * handles click events, delegated on the <tab-group>
 	 * @param {MouseEvent} e - the click event
 	 */
 	onClick(e) {
 		// check if the click occurred on or within a <tab-button>
-		const tabButton = e.target.closest('tab-button');
+		const tabButton = e.target.closest && e.target.closest('tab-button');
 		if (!tabButton) return;
 
-		// determine the index of the clicked tab-button
+		// determine the index of the clicked tab-button. only our own tabs
+		// count, so nested tab-groups never hijack each other.
 		const index = this.tabButtons.indexOf(tabButton);
 		if (index === -1) return;
+
+		// disabled tabs are not activatable
+		if (this._isDisabled(tabButton)) return;
 
 		// activate the tab with the corresponding index
 		this.setActiveTab(index);
@@ -316,39 +607,55 @@ class TabGroup extends HTMLElement {
 	 * @param {KeyboardEvent} e - the keydown event
 	 */
 	onKeyDown(e) {
-		// only process keys if focus is on a <tab-button>
+		// only process keys if focus is on one of our own <tab-button> elements
 		const targetIndex = this.tabButtons.indexOf(e.target);
 		if (targetIndex === -1) return;
 
-		let newIndex = targetIndex;
+		let newIndex;
 		switch (e.key) {
 			case 'ArrowLeft':
 			case 'ArrowUp':
-				// move to the previous tab (wrap around if necessary)
-				newIndex =
-					targetIndex > 0 ? targetIndex - 1 : this.tabButtons.length - 1;
+				// move to the previous enabled tab (wrap around if necessary)
+				newIndex = this._roving(targetIndex, -1);
 				e.preventDefault();
 				break;
 			case 'ArrowRight':
 			case 'ArrowDown':
-				// move to the next tab (wrap around if necessary)
-				newIndex = (targetIndex + 1) % this.tabButtons.length;
+				// move to the next enabled tab (wrap around if necessary)
+				newIndex = this._roving(targetIndex, 1);
 				e.preventDefault();
 				break;
 			case 'Home':
-				// jump to the first tab
-				newIndex = 0;
+				// jump to the first enabled tab
+				newIndex = this._roving(-1, 1);
 				e.preventDefault();
 				break;
 			case 'End':
-				// jump to the last tab
-				newIndex = this.tabButtons.length - 1;
+				// jump to the last enabled tab
+				newIndex = this._roving(this.tabButtons.length, -1);
 				e.preventDefault();
 				break;
 			default:
 				return; // ignore other keys
 		}
+		if (newIndex === -1) return;
 		this.setActiveTab(newIndex);
+	}
+
+	/**
+	 * @function _roving
+	 * walks from `from` in `direction`, wrapping, until it lands on an enabled
+	 * tab. returns -1 when every tab is disabled.
+	 */
+	_roving(from, direction) {
+		const count = this.tabButtons.length;
+		if (count === 0) return -1;
+		let index = from;
+		for (let step = 0; step < count; step++) {
+			index = (((index + direction) % count) + count) % count;
+			if (!this._isDisabled(this.tabButtons[index])) return index;
+		}
+		return -1;
 	}
 }
 
